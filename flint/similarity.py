@@ -1,10 +1,70 @@
+# Copyright 2026 Google LLC
+# Licensed under Apache 2.0
+
+"""Vector similarity and distance metrics for embedding comparison."""
+
+from typing import Dict, List, Sequence, Tuple, Union
 import numpy as np
-def cosine_similarity(a, b):
-    a_n = a / np.clip(np.linalg.norm(a, axis=-1, keepdims=True), 1e-12, None)
-    b_n = b / np.clip(np.linalg.norm(b, axis=-1, keepdims=True), 1e-12, None)
-    return np.dot(a_n, b_n.T)
-def batch_similarity(q, c): return cosine_similarity(q if q.ndim==2 else q.reshape(1,-1), c).squeeze(0)
-def find_top_k(q, c, k=5):
-    s = batch_similarity(q, c)
-    top = np.argsort(s)[::-1][:k]
-    return [(int(i), float(s[i])) for i in top]
+
+
+def l2_normalize(vec: Union[np.ndarray, Sequence[float]]) -> np.ndarray:
+  arr = np.asarray(vec, dtype=np.float32)
+  norm = np.linalg.norm(arr)
+  if norm == 0:
+    return arr
+  return arr / norm
+
+
+def cosine_similarity(
+    vec1: Union[np.ndarray, Sequence[float]],
+    vec2: Union[np.ndarray, Sequence[float]],
+) -> float:
+  v1 = np.asarray(vec1, dtype=np.float32)
+  v2 = np.asarray(vec2, dtype=np.float32)
+  denom = np.linalg.norm(v1) * np.linalg.norm(v2)
+  if denom == 0:
+    return 0.0
+  return float(np.dot(v1, v2) / denom)
+
+
+def dot_product(
+    vec1: Union[np.ndarray, Sequence[float]],
+    vec2: Union[np.ndarray, Sequence[float]],
+) -> float:
+  v1 = np.asarray(vec1, dtype=np.float32)
+  v2 = np.asarray(vec2, dtype=np.float32)
+  return float(np.dot(v1, v2))
+
+
+def euclidean_distance(
+    vec1: Union[np.ndarray, Sequence[float]],
+    vec2: Union[np.ndarray, Sequence[float]],
+) -> float:
+  v1 = np.asarray(vec1, dtype=np.float32)
+  v2 = np.asarray(vec2, dtype=np.float32)
+  return float(np.linalg.norm(v1 - v2))
+
+
+def search_vectors(
+    query_vector: Union[np.ndarray, Sequence[float]],
+    database_vectors: Dict[str, Union[np.ndarray, Sequence[float]]],
+    threshold: float = 0.85,
+    metric: str = "cosine",
+) -> List[Tuple[str, float]]:
+  matches = []
+  for filepath, db_vec in database_vectors.items():
+    if metric == "cosine":
+      score = cosine_similarity(query_vector, db_vec)
+      if score >= threshold:
+        matches.append((filepath, score))
+    elif metric == "dot":
+      score = dot_product(query_vector, db_vec)
+      if score >= threshold:
+        matches.append((filepath, score))
+    elif metric == "euclidean":
+      dist = euclidean_distance(query_vector, db_vec)
+      if dist <= threshold:
+        matches.append((filepath, dist))
+
+  reverse = metric != "euclidean"
+  return sorted(matches, key=lambda x: x[1], reverse=reverse)
