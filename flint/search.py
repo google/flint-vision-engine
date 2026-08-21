@@ -1,24 +1,51 @@
-import numpy as np
-from flint.similarity import find_top_k
-class VectorIndex:
-    def __init__(self, dim):
-        self.dim = dim
-        self.vectors = np.empty((0, dim), dtype=np.float32)
-        self.metadata = []
-    def add(self, vec, meta=None):
-        self.vectors = np.vstack([self.vectors, vec if vec.ndim==2 else vec.reshape(1,-1)])
-        self.metadata.append(meta)
-    def search(self, q, k=5):
-        return [(i, s, self.metadata[i]) for i, s in find_top_k(q, self.vectors, k=k)]
-class CrossModalSearch:
-    def __init__(self, engine):
-        self.engine = engine
-        self.index = None
-    def index_images(self, imgs, meta=None):
-        res = self.engine.embed_images(imgs)
-        self.index = VectorIndex(res.dimension)
-        for i in range(len(imgs)):
-            self.index.add(res.embeddings[i], meta[i] if meta else {"index": i})
-    def query_text(self, text, k=5):
-        emb = self.engine.embed_text(text).embeddings[0]
-        return self.index.search(emb, k=k)
+# Copyright 2026 Google LLC
+# Licensed under Apache 2.0
+
+"""High-level search APIs for text, crop, and visual similarity matching."""
+
+from typing import Dict, List, Sequence, Tuple, Union
+from flint.engine import FlintEngine
+from flint.similarity import search_vectors
+
+
+def text_to_image_search(
+    engine: FlintEngine,
+    text_query: str,
+    database_vectors: Dict[str, Union[Sequence[float], list]],
+    threshold: float = 0.85,
+) -> List[Tuple[str, float]]:
+  query_vec = engine.compute_text_embedding(text_query, normalize=True)
+  return search_vectors(
+      query_vec, database_vectors, threshold=threshold, metric="cosine"
+  )
+
+
+def crop_search(
+    engine: FlintEngine,
+    image_path: str,
+    bounding_box: Tuple[int, int, int, int],
+    database_vectors: Dict[str, Union[Sequence[float], list]],
+    threshold: float = 0.85,
+    metric: str = "cosine",
+) -> List[Tuple[str, float]]:
+  normalize = metric != "dot"
+  crop_vec = engine.extract_crop_embedding(
+      image_path, bounding_box, normalize=normalize
+  )
+  return search_vectors(
+      crop_vec, database_vectors, threshold=threshold, metric=metric
+  )
+
+
+def visual_similarity_search(
+    engine: FlintEngine,
+    image_path: str,
+    database_vectors: Dict[str, Union[Sequence[float], list]],
+    threshold: float = 0.85,
+    metric: str = "cosine",
+) -> List[Tuple[str, float]]:
+  normalize = metric != "dot"
+  query_vec = engine.compute_image_embedding(image_path, normalize=normalize)
+  return search_vectors(
+      query_vec, database_vectors, threshold=threshold, metric=metric
+  )
