@@ -208,7 +208,7 @@ blockquote {
 <tr>
 <td><strong>1. Initialize Storage Vault</strong></td>
 <td><code>python3 scripts/filesystem-migration/build_hex_vault_structure.py</code></td>
-<td>Double-click <code>build_vault.bat</code></td>
+<td>Double-click <code>launchers\build_vault.bat</code></td>
 <td>Generates 65,536 hex buckets (<code>00/00</code> to <code>ff/ff</code>).</td>
 </tr>
 <tr>
@@ -220,7 +220,7 @@ blockquote {
 <tr>
 <td><strong>3. Start Studio</strong></td>
 <td><code>python3 web/server.py</code></td>
-<td>Double-click <code>start_studio.bat</code></td>
+<td>Double-click <code>launchers\start_studio.bat</code></td>
 <td>Launches Web Studio on <code>http://localhost:8080</code>.</td>
 </tr>
 <tr>
@@ -232,13 +232,13 @@ blockquote {
 <tr>
 <td><strong>5. Run Phase 1 Discovery</strong></td>
 <td><code>python3 scripts/filesystem-migration/scan_legacy_manifest.py -s <path></code></td>
-<td>Double-click <code>scan_manifest.bat</code></td>
+<td>Double-click <code>launchers\scan_manifest.bat</code></td>
 <td>Read-only scan; catalogs files into <code>migration_manifest</code>.</td>
 </tr>
 <tr>
 <td><strong>6. Run Phase 2 Ingestion</strong></td>
 <td><code>python3 scripts/filesystem-migration/migrate_vault_worker.py -v <path></code></td>
-<td>Double-click <code>migrate_vault.bat</code></td>
+<td>Double-click <code>launchers\migrate_vault.bat</code></td>
 <td>Embeds AI vectors, copies to vault, verifies readback.</td>
 </tr>
 <tr>
@@ -304,7 +304,7 @@ psql -d sympics_db -c &quot;SELECT manifest_id, source_filename, error_message F
 <h4>1. Where to Download Models (Choose Method A or B)</h4>
 <ul>
 <li><strong>Method A: Automated 1-Click Script (Recommended)</strong></li>
-<li>On Windows: Double-click <code>download_models.bat</code></li>
+<li>On Windows: Double-click <code>launchers\download_models.bat</code></li>
 <li>On Linux / macOS:</li>
 </ul>
 <pre><code class="language-bash">    python3 scripts/maintenance/download_offline_models.py --target-dir ./models --models all</code></pre>

@@ -424,11 +424,12 @@ def generate_all_html():
             f.write(full_html)
         print(f"[+] Generated: docs/html/{out_name}")
 
-    # Also generate Windows open_documentation.bat
-    bat_path = os.path.join(PROJECT_ROOT, "open_documentation.bat")
+    # Also generate Windows launchers/open_documentation.bat
+    bat_path = os.path.join(PROJECT_ROOT, "launchers", "open_documentation.bat")
+    os.makedirs(os.path.dirname(bat_path), exist_ok=True)
     with open(bat_path, "w", encoding="utf-8") as f:
-        f.write('@echo off\nstart "" "%~dp0docs\\html\\index.html"\n')
-    print(f"[+] Generated: open_documentation.bat")
+        f.write('@echo off\nstart "" "%~dp0..\\docs\\html\\index.html"\n')
+    print(f"[+] Generated: launchers/open_documentation.bat")
 
 if __name__ == "__main__":
     generate_all_html()

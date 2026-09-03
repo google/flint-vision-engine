@@ -55,6 +55,7 @@ image-correlation-suite/
 │   └── maintenance/                   # Vault integrity & anti-bit rot scrubber
 │
 ├── web/                               # Web frontend UI (HTML/CSS/JS) & REST API server
+├── launchers/                         # Windows 1-click batch launchers (Studio, Daemons, Ingestion)
 ├── tests/                             # Automated test suite (unit & integration with pytest)
 ├── systemd/                           # Enterprise systemd service templates
 ├── pyproject.toml                     # Python package build specifications (PEP 517/621)
@@ -91,7 +92,7 @@ pytest -v
 ```
 
 ### 3. Start Web UI & REST API Server (Port 8080)
-* **Windows (1-Click):** Double-click `start_studio.bat` (starts server and opens `http://localhost:8080`).
+* **Windows (1-Click):** Double-click `launchers\start_studio.bat` (starts server and opens `http://localhost:8080`).
 * **Windows 24/7 Supervisor Service:** Right-click `scripts\windows\install_windows_supervisor_task.bat` and run as Admin (auto-restarts web & intake daemons if they ever crash).
 * **Linux / macOS:**
   ```bash
@@ -99,10 +100,10 @@ pytest -v
   ```
 
 ### 4. Run Vault Ingestion & Migration
-* **Windows (1-Click Launchers):**
-  1. `build_vault.bat` — Pre-allocates 65,536 hex buckets in `future-lan-storage`.
-  2. `scan_manifest.bat` — Phase 1 100% read-only discovery scan.
-  3. `migrate_vault.bat` — Phase 2 supervised parallel AI embedding & verified CAS copy.
+* **Windows (1-Click Launchers in `launchers/`):**
+  1. `launchers\build_vault.bat` — Pre-allocates 65,536 hex buckets in `future-lan-storage`.
+  2. `launchers\scan_manifest.bat` — Phase 1 100% read-only discovery scan.
+  3. `launchers\migrate_vault.bat` — Phase 2 supervised parallel AI embedding & verified CAS copy.
 * **Linux / macOS:**
   ```bash
   # Pre-allocate CAS vault buckets

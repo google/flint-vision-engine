@@ -15,12 +15,12 @@ This quickstart guide provides the direct commands, script executions, and troub
 
 | Task | Linux / macOS Command | Windows Command / Shortcut | Output / Expected Result |
 | :--- | :--- | :--- | :--- |
-| **1. Initialize Storage Vault** | `python3 scripts/filesystem-migration/build_hex_vault_structure.py` | Double-click `build_vault.bat` | Generates 65,536 hex buckets (`00/00` to `ff/ff`). |
+| **1. Initialize Storage Vault** | `python3 scripts/filesystem-migration/build_hex_vault_structure.py` | Double-click `launchers\build_vault.bat` | Generates 65,536 hex buckets (`00/00` to `ff/ff`). |
 | **2. Initialize PostgreSQL** | `python3 database/init_database.py` | `python database/init_database.py` | Applies core schemas, triggers, and pgvector extension. |
-| **3. Start Studio** | `python3 web/server.py` | Double-click `start_studio.bat` | Launches Web Studio on `http://localhost:8080`. |
+| **3. Start Studio** | `python3 web/server.py` | Double-click `launchers\start_studio.bat` | Launches Web Studio on `http://localhost:8080`. |
 | **4. 24/7 Auto-Restart Supervisor** | `systemctl start sympics-watchdog` | Run `scripts\windows\install_windows_supervisor_task.bat` (Admin) | Keeps Web Studio and Intake Daemon alive 24/7 with auto-restart. |
-| **5. Run Phase 1 Discovery** | `python3 scripts/filesystem-migration/scan_legacy_manifest.py -s <path>` | Double-click `scan_manifest.bat` | Read-only scan; catalogs files into `migration_manifest`. |
-| **6. Run Phase 2 Ingestion** | `python3 scripts/filesystem-migration/migrate_vault_worker.py -v <path>` | Double-click `migrate_vault.bat` | Embeds AI vectors, copies to vault, verifies readback. |
+| **5. Run Phase 1 Discovery** | `python3 scripts/filesystem-migration/scan_legacy_manifest.py -s <path>` | Double-click `launchers\scan_manifest.bat` | Read-only scan; catalogs files into `migration_manifest`. |
+| **6. Run Phase 2 Ingestion** | `python3 scripts/filesystem-migration/migrate_vault_worker.py -v <path>` | Double-click `launchers\migrate_vault.bat` | Embeds AI vectors, copies to vault, verifies readback. |
 | **7. Clean Slate Protocol** | `python3 scripts/clean-slate/clean_slate_protocol.py` | Double-click `scripts\clean-slate\run_clean_slate.bat` | Clears all tables & resets storage vault to pristine state. |
 
 ---
@@ -102,7 +102,7 @@ Because secure air-gapped production workstations have no direct internet access
 #### 1. Where to Download Models (Choose Method A or B)
 
 * **Method A: Automated 1-Click Script (Recommended)**
-  * On Windows: Double-click `download_models.bat`
+  * On Windows: Double-click `launchers\download_models.bat`
   * On Linux / macOS:
     ```bash
     python3 scripts/maintenance/download_offline_models.py --target-dir ./models --models all

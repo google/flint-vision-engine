@@ -10,7 +10,7 @@ echo ===========================================================================
 echo  [*] STARTING SYMPICS INTAKE DAEMON (WATCHING STAGING FOLDER)
 echo ===============================================================================
 
-cd /d "%~dp0"
+cd /d "%~dp0\.."
 
 if exist "venv\Scripts\python.exe" (
     set "PYTHON_EXE=venv\Scripts\python.exe"
