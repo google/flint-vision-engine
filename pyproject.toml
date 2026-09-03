@@ -5,9 +5,9 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "image-correlation-suite"
 version = "1.0.0"
-description = "Enterprise Forensic Vision Intelligence Platform & CAS Media Vault"
+description = "Enterprise Vision Intelligence Platform & CAS Media Vault"
 readme = "README.md"
-authors = [{ name = "Forensic Engineering Team" }]
+authors = [{ name = "Engineering Team" }]
 license = { file = "LICENSE" }
 requires-python = ">=3.10"
 dependencies = [
