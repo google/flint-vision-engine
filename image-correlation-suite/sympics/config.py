@@ -9,7 +9,7 @@ sensible production defaults and validation.
 """
 
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -21,19 +21,27 @@ class DatabaseConfig:
     password: str = os.getenv("SYMPICS_DB_PASSWORD", "")
 
 
+def _resolve_default_path(*parts):
+    local_p = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", *parts))
+    parent_p = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", *parts))
+    if os.path.exists(parent_p) and not os.path.exists(local_p):
+        return parent_p
+    return local_p
+
+
 @dataclass
 class StorageConfig:
     vault_root: str = os.path.abspath(os.getenv(
         "SYMPICS_VAULT_ROOT",
-        os.path.join(os.path.dirname(__file__), "..", "future-lan-storage")
+        _resolve_default_path("future-lan-storage")
     ))
     staging_dir: str = os.path.abspath(os.getenv(
         "SYMPICS_STAGING_DIR",
-        os.path.join(os.path.dirname(__file__), "..", "future-lan-storage", "03_Ingestion_Staging")
+        _resolve_default_path("future-lan-storage", "03_Ingestion_Staging")
     ))
     quarantine_dir: str = os.path.abspath(os.getenv(
         "SYMPICS_QUARANTINE_DIR",
-        os.path.join(os.path.dirname(__file__), "..", "future-lan-storage", "03_Ingestion_Staging", "_quarantine")
+        _resolve_default_path("future-lan-storage", "03_Ingestion_Staging", "_quarantine")
     ))
 
 
@@ -46,9 +54,9 @@ class ServerConfig:
 
 @dataclass
 class SympicsConfig:
-    db: DatabaseConfig = DatabaseConfig()
-    storage: StorageConfig = StorageConfig()
-    server: ServerConfig = ServerConfig()
+    db: DatabaseConfig = field(default_factory=DatabaseConfig)
+    storage: StorageConfig = field(default_factory=StorageConfig)
+    server: ServerConfig = field(default_factory=ServerConfig)
 
 
 # Global config instance

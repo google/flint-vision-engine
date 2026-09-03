@@ -27,7 +27,9 @@ if _db_dir not in sys.path:
 import db
 from embedder_service import VisionEmbedderService
 
-VAULT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "future-lan-storage"))
+cand_local = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "future-lan-storage"))
+cand_parent = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "future-lan-storage"))
+VAULT_ROOT = os.getenv("SYMPICS_VAULT_ROOT") or (cand_parent if (os.path.exists(cand_parent) and not os.path.exists(cand_local)) else cand_local)
 
 
 def worker_process(worker_id, num_workers, model_name, batch_size, progress_counter, total_count):

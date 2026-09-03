@@ -732,8 +732,20 @@ def main():
     print_banner()
     print_hardware_banner()
 
-    default_staging = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "future-lan-storage", "03_Ingestion_Staging"))
-    default_vault = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "future-lan-storage"))
+    def _find_vault(*parts):
+        env_v = os.getenv("SYMPICS_VAULT_ROOT")
+        if env_v and not parts:
+            return os.path.abspath(env_v)
+        elif env_v and parts:
+            return os.path.abspath(os.path.join(env_v, *parts))
+        cand_local = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "future-lan-storage", *parts))
+        cand_parent = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "future-lan-storage", *parts))
+        if os.path.exists(cand_parent) and not os.path.exists(cand_local):
+            return cand_parent
+        return cand_local
+
+    default_staging = os.getenv("SYMPICS_STAGING_DIR") or _find_vault("03_Ingestion_Staging")
+    default_vault = _find_vault()
 
     parser = argparse.ArgumentParser(
         description="SYMPICS Real-Time Automated Server Intake & Multi-Model AI Daemon."

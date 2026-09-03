@@ -11,9 +11,9 @@ from database.embedder_service import (
     VisionEmbedderService,
     get_embedder,
     extract_embedded_raw_jpeg,
-    load_image_or_raw,
-    generate_thumbnail
+    load_image_or_raw
 )
+from sympics.ai.thumbnailer import generate_thumbnail
 
 __all__ = [
     "VisionEmbedderService",

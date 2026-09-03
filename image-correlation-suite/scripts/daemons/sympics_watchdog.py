@@ -137,8 +137,10 @@ def run_watchdog(http_port=8080, check_interval=5.0, supervise_intake=True):
 
     # 2. Intake Daemon Service (Optional)
     if supervise_intake:
-        staging_dir = os.path.join(_project_root, "future-lan-storage", "03_Ingestion_Staging")
-        vault_dir = os.path.join(_project_root, "future-lan-storage")
+        cand_local = os.path.join(_project_root, "future-lan-storage")
+        cand_parent = os.path.join(_project_root, "..", "future-lan-storage")
+        vault_dir = os.getenv("SYMPICS_VAULT_ROOT") or (cand_parent if (os.path.exists(cand_parent) and not os.path.exists(cand_local)) else cand_local)
+        staging_dir = os.getenv("SYMPICS_STAGING_DIR") or os.path.join(vault_dir, "03_Ingestion_Staging")
         intake_svc = ServiceSupervisor(
             name="Sympics-Intake-Daemon",
             cmd_args=[

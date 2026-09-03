@@ -386,10 +386,18 @@ def main():
     args = parser.parse_args()
 
     # Determine default candidate
-    default_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "current-lan-storage"))
+    cand_local = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "current-lan-storage"))
+    cand_parent = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "current-lan-storage"))
+    default_dir = cand_parent if (os.path.exists(cand_parent) and not os.path.exists(cand_local)) else cand_local
 
     source_path = args.source_dir
     max_gb = args.max_gb
+
+    if source_path and not os.path.isabs(source_path):
+        if not os.path.exists(source_path) and os.path.exists(os.path.join("..", source_path)):
+            source_path = os.path.abspath(os.path.join("..", source_path))
+        else:
+            source_path = os.path.abspath(source_path)
 
     if not source_path:
         if not args.non_interactive:

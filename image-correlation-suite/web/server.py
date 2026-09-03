@@ -47,10 +47,19 @@ if os.path.exists(_env_path):
                 if _k not in os.environ:
                     os.environ[_k] = _v
 
+def _resolve_vault_path(folder_name="future-lan-storage"):
+    if os.getenv("SYMPICS_VAULT_ROOT"):
+        return os.path.abspath(os.getenv("SYMPICS_VAULT_ROOT"))
+    local_path = os.path.join(_root_dir, folder_name)
+    parent_path = os.path.join(_root_dir, "..", folder_name)
+    if os.path.exists(parent_path) and not os.path.exists(local_path):
+        return os.path.abspath(parent_path)
+    return os.path.abspath(local_path)
+
 DEFAULT_PORT = int(os.getenv("SYMPICS_WEB_PORT", "8080"))
 DEFAULT_HOST = os.getenv("SYMPICS_WEB_HOST", "0.0.0.0")
-VAULT_ROOT = os.path.join(_root_dir, "future-lan-storage")
-STAGING_DIR = os.path.join(VAULT_ROOT, "03_Ingestion_Staging")
+VAULT_ROOT = _resolve_vault_path("future-lan-storage")
+STAGING_DIR = os.getenv("SYMPICS_STAGING_DIR") or os.path.join(VAULT_ROOT, "03_Ingestion_Staging")
 
 
 class SympicsHTTPHandler(BaseHTTPRequestHandler):

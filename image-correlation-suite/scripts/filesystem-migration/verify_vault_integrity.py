@@ -275,7 +275,11 @@ def main():
     print_banner()
 
     parser = argparse.ArgumentParser(description="SYMPICS Forensic Vault Integrity Auditor.")
-    default_vault = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "future-lan-storage"))
+    cand_local = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "future-lan-storage"))
+    cand_parent = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "future-lan-storage"))
+    default_vault = cand_parent if (os.path.exists(cand_parent) and not os.path.exists(cand_local)) else cand_local
+    if os.getenv("SYMPICS_VAULT_ROOT"):
+        default_vault = os.path.abspath(os.getenv("SYMPICS_VAULT_ROOT"))
     parser.add_argument("--vault-dir", "-v", default=default_vault)
     parser.add_argument("--reports-dir", "-r", default=None)
     parser.add_argument("--stat-only", action="store_true", help="Run fast stat-only check without reading full bytes.")

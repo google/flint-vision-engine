@@ -27,8 +27,8 @@ if (Test-Path "$ProjectRoot\.env") {
 }
 $ServerScript = "$ProjectRoot\web\server.py"
 $IntakeScript = "$ProjectRoot\scripts\daemons\sympics_intake_daemon.py"
-$StagingDir = "$ProjectRoot\future-lan-storage\03_Ingestion_Staging"
-$VaultDir = "$ProjectRoot\future-lan-storage"
+$VaultDir = if (Test-Path "$ProjectRoot\future-lan-storage") { "$ProjectRoot\future-lan-storage" } elseif (Test-Path "$ProjectRoot\..\future-lan-storage") { (Resolve-Path "$ProjectRoot\..\future-lan-storage").Path } else { "$ProjectRoot\future-lan-storage" }
+$StagingDir = "$VaultDir\03_Ingestion_Staging"
 
 Write-Host "===============================================================================" -ForegroundColor Cyan
 Write-Host " [*]  SYMPICS WINDOWS PROCESS & SERVICE SUPERVISOR" -ForegroundColor Cyan

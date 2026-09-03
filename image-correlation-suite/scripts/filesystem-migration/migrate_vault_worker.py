@@ -757,8 +757,15 @@ def main():
 
     args = parser.parse_args()
 
-    default_vault = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "future-lan-storage"))
-    vault_path = args.vault_dir or default_vault
+    cand_local = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "future-lan-storage"))
+    cand_parent = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "future-lan-storage"))
+    default_vault = cand_parent if (os.path.exists(cand_parent) and not os.path.exists(cand_local)) else cand_local
+    vault_path = args.vault_dir or os.getenv("SYMPICS_VAULT_ROOT") or default_vault
+    if vault_path and not os.path.isabs(vault_path):
+        if not os.path.exists(vault_path) and os.path.exists(os.path.join("..", vault_path)):
+            vault_path = os.path.abspath(os.path.join("..", vault_path))
+        else:
+            vault_path = os.path.abspath(vault_path)
 
     if args.single_process:
         print_banner()

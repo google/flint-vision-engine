@@ -23,7 +23,16 @@ import shutil
 from datetime import datetime
 from PIL import Image, ImageOps
 
-VAULT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "future-lan-storage"))
+def _resolve_vault_path(folder_name="future-lan-storage"):
+    if os.getenv("SYMPICS_VAULT_ROOT"):
+        return os.path.abspath(os.getenv("SYMPICS_VAULT_ROOT"))
+    local_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", folder_name))
+    parent_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", folder_name))
+    if os.path.exists(parent_path) and not os.path.exists(local_path):
+        return parent_path
+    return local_path
+
+VAULT_ROOT = _resolve_vault_path("future-lan-storage")
 
 # Add database module to path
 _db_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "database"))
@@ -2499,7 +2508,7 @@ def import_reference_targets(body, conn=None):
     try:
         from embedder_service import get_embedder
         embedder = get_embedder()
-        vault_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "future-lan-storage"))
+        vault_root = VAULT_ROOT
 
         imported_count = 0
         with conn.cursor() as cur:

@@ -116,7 +116,11 @@ def scrub_vault_integrity(vault_root: str, sample_size: int = None):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="SYMPICS Vault Integrity Scrubber.")
-    default_vault = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "future-lan-storage"))
+    cand_local = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "future-lan-storage"))
+    cand_parent = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "future-lan-storage"))
+    default_vault = cand_parent if (os.path.exists(cand_parent) and not os.path.exists(cand_local)) else cand_local
+    if os.getenv("SYMPICS_VAULT_ROOT"):
+        default_vault = os.path.abspath(os.getenv("SYMPICS_VAULT_ROOT"))
     parser.add_argument("--vault-dir", "-v", default=default_vault, help="Path to SYMPICS storage vault.")
     parser.add_argument("--sample", "-s", type=int, default=None, help="Scrub random sample of N files.")
 

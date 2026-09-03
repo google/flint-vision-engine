@@ -19,7 +19,9 @@ import shutil
 import psycopg2
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-STORAGE_ROOT = os.path.join(PROJECT_ROOT, "future-lan-storage")
+cand_local = os.path.join(PROJECT_ROOT, "future-lan-storage")
+cand_parent = os.path.join(PROJECT_ROOT, "..", "future-lan-storage")
+STORAGE_ROOT = os.getenv("SYMPICS_VAULT_ROOT") or (cand_parent if (os.path.exists(cand_parent) and not os.path.exists(cand_local)) else cand_local)
 
 TABLES_TO_TRUNCATE = [
     "case_evidence_actions",

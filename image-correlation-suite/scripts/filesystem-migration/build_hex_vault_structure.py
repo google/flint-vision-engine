@@ -171,6 +171,10 @@ def main():
 
     # Step 1: Determine Destination Path
     target_path = args.target_dir
+    if target_path and not os.path.isabs(target_path):
+        if not os.path.exists(target_path) and os.path.exists(os.path.join("..", target_path)):
+            target_path = os.path.join("..", target_path)
+
     if not target_path:
         print("Please enter the destination path where you want to build the new storage structure.")
         print("Examples:")
@@ -180,7 +184,9 @@ def main():
         print()
         
         # Suggest current working directory or standard default
-        default_candidate = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "future-lan-storage"))
+        cand_local = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "future-lan-storage"))
+        cand_parent = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "future-lan-storage"))
+        default_candidate = cand_parent if (os.path.exists(cand_parent) and not os.path.exists(cand_local)) else cand_local
         target_path = get_user_input("Enter Target Directory Path", default_val=default_candidate)
 
     # Step 2: Validate Target Path
