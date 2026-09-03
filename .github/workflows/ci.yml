@@ -1,0 +1,75 @@
+name: SYMPICS CI / Automated Forensic Verification
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_DB: sympics_test_db
+          POSTGRES_USER: sympics_test_user
+          POSTGRES_PASSWORD: test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libraw-dev libmagic-dev libheif-dev
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run Ruff Linter & Code Style Checks
+        run: |
+          ruff check .
+
+      - name: Validate Git Exclusion Integrity (Zero Media / Zero Live Data)
+        run: |
+          echo "Verifying no media, spreadsheets, or database binaries are tracked..."
+          ! git ls-files | grep -E "\.(jpg|jpeg|png|cr3|cr2|nef|arw|dng|tif|mp4|mov|csv|xlsx|db|sqlite|dump)$"
+
+      - name: Initialize Test Database Schemas
+        env:
+          PGHOST: localhost
+          PGPORT: 5432
+          PGDATABASE: sympics_test_db
+          PGUSER: sympics_test_user
+          PGPASSWORD: test_password
+        run: |
+          python3 database/init_database.py
+
+      - name: Execute Pytest Suite with Coverage
+        env:
+          PGHOST: localhost
+          PGPORT: 5432
+          PGDATABASE: sympics_test_db
+          PGUSER: sympics_test_user
+          PGPASSWORD: test_password
+        run: |
+          pytest -v --cov=sympics --cov=database --cov=web tests/

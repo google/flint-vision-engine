@@ -1,0 +1,16 @@
+[Unit]
+Description=SYMPICS Automated Ingestion Daemon
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=sympics
+WorkingDirectory=/opt/sympics/image-correlation-suite
+ExecStart=/usr/bin/python3 scripts/daemons/sympics_intake_daemon.py
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -10,5 +10,5 @@ Processing massive datasets natively requires understanding hardware capabilitie
 | **DINOv3 ViT-B/16** | ~33 hours (*~60 ms/img*) | ~19 hours (*~35 ms/img*) | ~4.5 hours (*~8 ms/img*) |
 ---
 ### Hardware Takeaways
-1. **Edge/Laptops**: `mobileCLIP` and `SigLIP2 Base` offer exceptional throughput on standard forensic investigator laptops (Apple M-series or modern Intel CPUs).
+1. **Edge/Laptops**: `mobileCLIP` and `SigLIP2 Base` offer exceptional throughput on standard analyst laptops (Apple M-series or modern Intel CPUs).
 2. **Dedicated Triage Stations**: Moderate GPUs (such as RTX 3060) process multi-million image databases in under 2–3 hours.

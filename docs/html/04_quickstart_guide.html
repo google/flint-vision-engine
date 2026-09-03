@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYMPICS Documentation - 4. Operations Manual</title>
+    <style>
+
+:root {
+    --bg: #0f172a;
+    --card-bg: #1e293b;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --border: #334155;
+    --accent: #38bdf8;
+    --accent-hover: #0284c7;
+    --code-bg: #020617;
+    --code-border: #1e293b;
+    --table-header: #1e293b;
+    --table-stripe: #0f172a;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.6;
+    padding: 0;
+}
+
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 280px;
+    background: #090d16;
+    border-right: 1px solid var(--border);
+    padding: 24px 16px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.sidebar-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    letter-spacing: 0.5px;
+}
+
+.nav-item {
+    display: block;
+    padding: 8px 12px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+    transition: all 0.15s;
+}
+
+.nav-item:hover {
+    background: var(--card-bg);
+    color: var(--text-primary);
+}
+
+.nav-item.active {
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.content-wrapper {
+    margin-left: 280px;
+    flex: 1;
+    padding: 40px 60px;
+    max-width: 1100px;
+}
+
+h1 { font-size: 2.2rem; font-weight: 800; color: #fff; margin-bottom: 12px; border-bottom: 2px solid var(--accent); padding-bottom: 10px; }
+h2 { font-size: 1.5rem; font-weight: 700; color: var(--accent); margin-top: 32px; margin-bottom: 12px; }
+h3 { font-size: 1.2rem; font-weight: 600; color: #e2e8f0; margin-top: 24px; margin-bottom: 8px; }
+h4 { font-size: 1.05rem; font-weight: 600; color: #cbd5e1; margin-top: 18px; margin-bottom: 6px; }
+
+p { margin-bottom: 16px; color: #cbd5e1; }
+ul, ol { margin-bottom: 16px; padding-left: 24px; color: #cbd5e1; }
+li { margin-bottom: 6px; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+hr { border: 0; border-top: 1px solid var(--border); margin: 30px 0; }
+
+code {
+    font-family: "JetBrains Mono", Consolas, Monaco, "Courier New", monospace;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: #38bdf8;
+}
+
+pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+pre code {
+    background: transparent;
+    padding: 0;
+    color: #e2e8f0;
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+
+th, td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.92rem;
+}
+
+th {
+    background: var(--table-header);
+    color: #fff;
+    font-weight: 600;
+}
+
+tr:nth-child(even) {
+    background: var(--table-stripe);
+}
+
+blockquote {
+    border-left: 4px solid var(--accent);
+    padding: 10px 16px;
+    background: rgba(56, 189, 248, 0.05);
+    margin-bottom: 16px;
+    border-radius: 0 6px 6px 0;
+    color: #cbd5e1;
+}
+
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: rgba(56, 189, 248, 0.2);
+    color: var(--accent);
+}
+
+@media (max-width: 900px) {
+    .sidebar { display: none; }
+    .content-wrapper { margin-left: 0; padding: 20px; }
+}
+
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <nav class="sidebar">
+            <div class="sidebar-title">SYMPICS DOCUMENTATION</div>
+            <a class="nav-item" href="index.html">Overview & Quickstart</a>
+<a class="nav-item" href="01_executive_brief.html">1. Executive Brief</a>
+<a class="nav-item" href="02_migration_architecture.html">2. Four-Phase Migration</a>
+<a class="nav-item" href="03_cas_whitepaper.html">3. CAS Whitepaper</a>
+<a class="nav-item active" href="04_quickstart_guide.html">4. Operations Manual</a>
+<a class="nav-item" href="05_windows_setup_guide.html">5. Windows Setup Guide</a>
+<a class="nav-item" href="06_git_training.html">6. Git SOP & Training</a>
+        </nav>
+        <main class="content-wrapper">
+            <h1>SYMPICS Migration & Operations Quickstart Guide</h1>
+<h2>Step-by-Step Operator Manual for System Administrators & Analysts</h2>
+<hr>
+<h3>Overview</h3>
+<p>This quickstart guide provides the direct commands, script executions, and troubleshooting procedures needed to operate the SYMPICS Migration Pipeline and monitor the PostgreSQL database.</p>
+<p><em>For barebones Windows installations without PostgreSQL, refer to the <a href="05_windows_workstation_setup_guide.html">Windows Workstation Setup Guide</a>.</em></p>
+<hr>
+<h3>Complete Operations Command Matrix</h3>
+<table>
+<thead><tr>
+<th>Task</th>
+<th>Linux / macOS Command</th>
+<th>Windows Command / Shortcut</th>
+<th>Output / Expected Result</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>1. Initialize Storage Vault</strong></td>
+<td><code>python3 scripts/filesystem-migration/build_hex_vault_structure.py</code></td>
+<td>Double-click <code>build_vault.bat</code></td>
+<td>Generates 65,536 hex buckets (<code>00/00</code> to <code>ff/ff</code>).</td>
+</tr>
+<tr>
+<td><strong>2. Initialize PostgreSQL</strong></td>
+<td><code>python3 database/init_database.py</code></td>
+<td><code>python database/init_database.py</code></td>
+<td>Applies core schemas, triggers, and pgvector extension.</td>
+</tr>
+<tr>
+<td><strong>3. Start Studio</strong></td>
+<td><code>python3 web/server.py</code></td>
+<td>Double-click <code>start_studio.bat</code></td>
+<td>Launches Web Studio on <code>http://localhost:8080</code>.</td>
+</tr>
+<tr>
+<td><strong>4. 24/7 Auto-Restart Supervisor</strong></td>
+<td><code>systemctl start sympics-watchdog</code></td>
+<td>Run <code>scripts\windows\install_windows_supervisor_task.bat</code> (Admin)</td>
+<td>Keeps Web Studio and Intake Daemon alive 24/7 with auto-restart.</td>
+</tr>
+<tr>
+<td><strong>5. Run Phase 1 Discovery</strong></td>
+<td><code>python3 scripts/filesystem-migration/scan_legacy_manifest.py -s <path></code></td>
+<td>Double-click <code>scan_manifest.bat</code></td>
+<td>Read-only scan; catalogs files into <code>migration_manifest</code>.</td>
+</tr>
+<tr>
+<td><strong>6. Run Phase 2 Ingestion</strong></td>
+<td><code>python3 scripts/filesystem-migration/migrate_vault_worker.py -v <path></code></td>
+<td>Double-click <code>migrate_vault.bat</code></td>
+<td>Embeds AI vectors, copies to vault, verifies readback.</td>
+</tr>
+<tr>
+<td><strong>7. Clean Slate Protocol</strong></td>
+<td><code>python3 scripts/clean-slate/clean_slate_protocol.py</code></td>
+<td>Double-click <code>scripts\clean-slate\run_clean_slate.bat</code></td>
+<td>Clears all tables & resets storage vault to pristine state.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3>Step-by-Step Execution Walkthrough</h3>
+<h4>Step 1: Initialize the Master Storage Vault</h4>
+<p>Builds the two-layer hexadecimal tree on the target Storage LAN drive:</p>
+<pre><code class="language-bash">python3 scripts/filesystem-migration/build_hex_vault_structure.py -t /path/to/future-lan-storage</code></pre>
+<ul>
+<li><strong>Time:</strong> ~5 to 10 seconds.</li>
+<li><strong>Output:</strong> Creates <code>01_Media_Vault/images/</code>, <code>01_Media_Vault/videos/</code>, and <code>02_Keyframe_Vault/thumbs_256px/</code>.</li>
+</ul>
+<hr>
+<h4>Step 2: Initialize Database Schemas</h4>
+<p>Creates the PostgreSQL database and tables (<code>migration_manifest</code>, <code>media_assets</code>, <code>media_embeddings</code>, <code>case_evidence_items</code>):</p>
+<pre><code class="language-bash">python3 database/init_database.py</code></pre>
+<hr>
+<h4>Step 3: Launch the Real-Time Web Dashboard</h4>
+<p>Start the monitoring dashboard to observe ingestion in real time:</p>
+<pre><code class="language-bash">python3 database/dashboard.py</code></pre>
+<ul>
+<li><strong>Local Access:</strong> Open <code>http://localhost:8085</code></li>
+<li><strong>Remote Workstation Access (SSH Tunnel):</strong></li>
+</ul>
+<pre><code class="language-bash">  ssh -L 8085:localhost:8085 &lt;user&gt;@&lt;server-ip&gt;</code></pre>
+<p>Then open <code>http://localhost:8085</code> in your browser.</p>
+<hr>
+<h4>Step 4: Run Phase 1 — Read-Only Discovery</h4>
+<p>Point the scanner at the legacy media folder:</p>
+<pre><code class="language-bash">python3 scripts/filesystem-migration/scan_legacy_manifest.py -s /path/to/legacy-storage</code></pre>
+<ul>
+<li><strong>Behavior:</strong> 100% read-only. Extracts SHA-256, MD5, SHA-1, sizes, and timestamps.</li>
+<li><strong>Speed:</strong> ~1,000 to 2,000 files/second.</li>
+</ul>
+<hr>
+<h4>Step 5: Run Phase 2 — AI Embedding & Verified Copy</h4>
+<p>Execute the ingestion worker to safely copy and verify data into the vault:</p>
+<pre><code class="language-bash">python3 scripts/filesystem-migration/migrate_vault_worker.py -v /path/to/future-lan-storage</code></pre>
+<ul>
+<li><strong>Behavior:</strong> Generates 768-dim SigLIP vectors and 256px WebP thumbnails, copies to hex vault, and validates readback SHA-256 before marking <code>VERIFIED_COPIED</code>.</li>
+</ul>
+<hr>
+<h3>Database Audit & Verification Commands</h3>
+<p>To check database migration status via command line at any time:</p>
+<pre><code class="language-bash"># View Summary Statistics
+psql -d sympics_db -c &quot;SELECT * FROM v_migration_summary;&quot;
+
+# View Ingestion Status Breakdown
+psql -d sympics_db -c &quot;SELECT status, count(*) FROM migration_manifest GROUP BY status;&quot;
+
+# Check for Any Failed / Corrupt Records
+psql -d sympics_db -c &quot;SELECT manifest_id, source_filename, error_message FROM migration_manifest WHERE status LIKE &#x27;FAILED%&#x27;;&quot;</code></pre>
+<hr>
+<h3>Step 6: Air-Gapped & Offline Model Provisioning</h3>
+<p>Because secure air-gapped production workstations have no direct internet access, model weights can be pre-downloaded on an internet-connected workstation and transferred via secure storage media.</p>
+<h4>1. Where to Download Models (Choose Method A or B)</h4>
+<ul>
+<li><strong>Method A: Automated 1-Click Script (Recommended)</strong></li>
+<li>On Windows: Double-click <code>download_models.bat</code></li>
+<li>On Linux / macOS:</li>
+</ul>
+<pre><code class="language-bash">    python3 scripts/maintenance/download_offline_models.py --target-dir ./models --models all</code></pre>
+<ul>
+<li><strong>Method B: Manual Hugging Face CLI</strong></li>
+</ul>
+<pre><code class="language-bash">  # 1. SigLIP-2 NaFlex (768-dim)
+  huggingface-cli download google/siglip2-base-patch16-naflex --local-dir ./models/siglip2-base-patch16-naflex
+
+  # 2. SigLIP Base (768-dim)
+  huggingface-cli download google/siglip-base-patch16-224 --local-dir ./models/siglip-base-patch16-224
+
+  # 3. CLIP ViT-B/32 (512-dim)
+  huggingface-cli download openai/clip-vit-base-patch32 --local-dir ./models/clip-vit-base-patch32</code></pre>
+<h4>2. Where to Put Models on the Production Server</h4>
+<p>Copy the downloaded <code>models/</code> directory into the <strong>root of the <code>image-correlation-suite/</code> project</strong>:</p>
+<pre><code class="language-text">image-correlation-suite/
+├── models/                               &lt;-- PLACE MODELS DIRECTORY HERE
+│   ├── siglip2-base-patch16-naflex/
+│   │   ├── config.json
+│   │   ├── model.safetensors
+│   │   └── preprocessor_config.json
+│   ├── siglip-base-patch16-224/
+│   │   ├── config.json
+│   │   └── model.safetensors
+│   └── clip-vit-base-patch32/
+│       ├── config.json
+│       └── model.safetensors
+├── web/
+└── sympics/</code></pre>
+<ul>
+<li><strong>Custom Storage Location (Optional):</strong> If you store models on a separate dedicated drive (e.g. <code>D:\AI_Models</code>), simply set the path in <code>.env</code>:</li>
+</ul>
+<pre><code class="language-ini">  SYMPICS_MODELS_DIR=D:\AI_Models</code></pre>
+<ul>
+<li><strong>Offline Verification:</strong> When the web server or intake daemon starts, it scans <code>./models/</code> first. If local files are detected, it loads weights strictly offline with <code>local_files_only=True</code> (zero internet required).</li>
+</ul>
+<h4>3. Special Procedure for Meta DINOv3 (Gated Model Approval)</h4>
+<p>Unlike SigLIP and CLIP (which are completely open-access), <strong>Meta DINOv3</strong> is a gated research model that requires an approved Hugging Face account:</p>
+<ol>
+<li><strong>Create or Log In to Hugging Face:</strong> Go to <a href="https://huggingface.co/join">huggingface.co/join</a>.</li>
+<li><strong>Request Access from Meta:</strong></li>
+</ol>
+<ul>
+<li>Navigate to the repository: <a href="https://huggingface.co/facebook/dinov3-vit-b-16">https://huggingface.co/facebook/dinov3-vit-b-16</a>.</li>
+<li>Review Meta's License and click <strong>"Acknowledge license / Request access"</strong>.</li>
+<li>Approval is typically granted automatically or within a few hours.</li>
+</ul>
+<ol>
+<li><strong>Generate a Personal Read Token:</strong></li>
+</ol>
+<ul>
+<li>In Hugging Face, go to <strong>Settings $\rightarrow$ Access Tokens</strong> (<a href="https://huggingface.co/settings/tokens">huggingface.co/settings/tokens</a>).</li>
+<li>Click <strong>"Create new token"</strong>, name it <code>sympics-downloader</code>, and select permissions: <strong><code>Read</code></strong>.</li>
+<li>Copy your generated token (starts with <code>hf_...</code>).</li>
+</ul>
+<ol>
+<li><strong>Download DINOv3 Using Your Token:</strong></li>
+</ol>
+<pre><code class="language-bash">   # Using the SYMPICS automated downloader:
+   python3 scripts/maintenance/download_offline_models.py --target-dir ./models --models dinov3 --hf-token &lt;YOUR_HF_TOKEN&gt;
+
+   # Or using huggingface-cli:
+   huggingface-cli download facebook/dinov3-vit-b-16 --token &lt;YOUR_HF_TOKEN&gt; --local-dir ./models/dinov3-vit-b-16</code></pre>
+<p><em>(Note: The platform functions completely with SigLIP-2, SigLIP Base, and CLIP even if DINOv3 is omitted).</em></p>
+<hr>
+<h3>Step 7: High-Performance Hardware & Database Optimization (128 GB RAM Tier)</h3>
+<p>To achieve maximum throughput during vector searches and million-file batch ingestion:</p>
+<ol>
+<li><strong>Locate your <code>postgresql.conf</code>:</strong></li>
+</ol>
+<ul>
+<li><strong>Windows:</strong> <code>C:\Program Files\PostgreSQL\16\data\postgresql.conf</code></li>
+<li><strong>Linux:</strong> <code>/etc/postgresql/16/main/postgresql.conf</code></li>
+</ul>
+<ol>
+<li><strong>Apply settings from <code>database/postgresql_tuning_128gb.conf</code>:</strong></li>
+</ol>
+<pre><code class="language-ini">   # Memory Configuration (Tuned for 128 GB RAM)
+   shared_buffers = 32GB          # Keeps active HNSW vector index nodes in RAM
+   work_mem = 64MB
+   maintenance_work_mem = 4GB     # Ultra-fast parallel HNSW index building
+   effective_cache_size = 80GB
+
+   # CPU Concurrency (Tuned for Threadripper / 24+ CPU Threads)
+   max_worker_processes = 24
+   max_parallel_workers = 16
+   max_parallel_maintenance_workers = 6
+   max_parallel_workers_per_gather = 4
+
+   # NVMe Storage Optimization
+   random_page_cost = 1.1
+   effective_io_concurrency = 200</code></pre>
+<ol>
+<li><strong>Restart PostgreSQL</strong> to apply the configuration.</li>
+</ol>
+        </main>
+    </div>
+</body>
+</html>

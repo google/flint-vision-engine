@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYMPICS Documentation - 2. Four-Phase Migration</title>
+    <style>
+
+:root {
+    --bg: #0f172a;
+    --card-bg: #1e293b;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --border: #334155;
+    --accent: #38bdf8;
+    --accent-hover: #0284c7;
+    --code-bg: #020617;
+    --code-border: #1e293b;
+    --table-header: #1e293b;
+    --table-stripe: #0f172a;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.6;
+    padding: 0;
+}
+
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 280px;
+    background: #090d16;
+    border-right: 1px solid var(--border);
+    padding: 24px 16px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.sidebar-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    letter-spacing: 0.5px;
+}
+
+.nav-item {
+    display: block;
+    padding: 8px 12px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+    transition: all 0.15s;
+}
+
+.nav-item:hover {
+    background: var(--card-bg);
+    color: var(--text-primary);
+}
+
+.nav-item.active {
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.content-wrapper {
+    margin-left: 280px;
+    flex: 1;
+    padding: 40px 60px;
+    max-width: 1100px;
+}
+
+h1 { font-size: 2.2rem; font-weight: 800; color: #fff; margin-bottom: 12px; border-bottom: 2px solid var(--accent); padding-bottom: 10px; }
+h2 { font-size: 1.5rem; font-weight: 700; color: var(--accent); margin-top: 32px; margin-bottom: 12px; }
+h3 { font-size: 1.2rem; font-weight: 600; color: #e2e8f0; margin-top: 24px; margin-bottom: 8px; }
+h4 { font-size: 1.05rem; font-weight: 600; color: #cbd5e1; margin-top: 18px; margin-bottom: 6px; }
+
+p { margin-bottom: 16px; color: #cbd5e1; }
+ul, ol { margin-bottom: 16px; padding-left: 24px; color: #cbd5e1; }
+li { margin-bottom: 6px; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+hr { border: 0; border-top: 1px solid var(--border); margin: 30px 0; }
+
+code {
+    font-family: "JetBrains Mono", Consolas, Monaco, "Courier New", monospace;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: #38bdf8;
+}
+
+pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+pre code {
+    background: transparent;
+    padding: 0;
+    color: #e2e8f0;
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+
+th, td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.92rem;
+}
+
+th {
+    background: var(--table-header);
+    color: #fff;
+    font-weight: 600;
+}
+
+tr:nth-child(even) {
+    background: var(--table-stripe);
+}
+
+blockquote {
+    border-left: 4px solid var(--accent);
+    padding: 10px 16px;
+    background: rgba(56, 189, 248, 0.05);
+    margin-bottom: 16px;
+    border-radius: 0 6px 6px 0;
+    color: #cbd5e1;
+}
+
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: rgba(56, 189, 248, 0.2);
+    color: var(--accent);
+}
+
+@media (max-width: 900px) {
+    .sidebar { display: none; }
+    .content-wrapper { margin-left: 0; padding: 20px; }
+}
+
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <nav class="sidebar">
+            <div class="sidebar-title">SYMPICS DOCUMENTATION</div>
+            <a class="nav-item" href="index.html">Overview & Quickstart</a>
+<a class="nav-item" href="01_executive_brief.html">1. Executive Brief</a>
+<a class="nav-item active" href="02_migration_architecture.html">2. Four-Phase Migration</a>
+<a class="nav-item" href="03_cas_whitepaper.html">3. CAS Whitepaper</a>
+<a class="nav-item" href="04_quickstart_guide.html">4. Operations Manual</a>
+<a class="nav-item" href="05_windows_setup_guide.html">5. Windows Setup Guide</a>
+<a class="nav-item" href="06_git_training.html">6. Git SOP & Training</a>
+        </nav>
+        <main class="content-wrapper">
+            <h1>SYMPICS Four-Phase Data Migration Architecture</h1>
+<h2>Comprehensive Technical Specification & Operational Runbook</h2>
+<hr>
+<h3>Introduction & Scope</h3>
+<p>This specification defines the end-to-end technical procedures, data structures, and cryptographic safeguards used to migrate legacy media repositories (10+ Terabytes, 10M+ media items) into the SYMPICS Enterprise Content-Addressable Storage (CAS) Vault and PostgreSQL database.</p>
+<hr>
+<h3>Core Guarantees</h3>
+<blockquote><strong>Migration Integrity Guarantees:</strong></blockquote>
+<blockquote>1. <strong>100% Non-Destructive:</strong> Legacy storage is mounted in strict read-only mode.</blockquote>
+<blockquote>2. <strong>Repeatable & Idempotent:</strong> Scripts can be re-run safely without creating duplicate files.</blockquote>
+<blockquote>3. <strong>Data Provenance:</strong> Every original path, filename, and date is preserved in the database.</blockquote>
+<blockquote>4. <strong>Readback Verification:</strong> Destination bytes are re-hashed and verified before completion.</blockquote>
+<hr>
+<h3>Phase-by-Phase Technical Breakdown</h3>
+<pre><code class="language-mermaid">sequenceDiagram
+    autonumber
+    participant Legacy as Legacy Storage (Read-Only)
+    participant Scanner as Phase 1: Scanner
+    participant DB as PostgreSQL (sympics_db)
+    participant Worker as Phase 2: AI &amp; Copy Worker
+    participant Vault as New Hex Vault (Storage LAN)
+
+    Note over Legacy,Scanner: PHASE 1: DISCOVERY
+    Scanner-&gt;&gt;Legacy: Recursive read-only file discovery
+    Scanner-&gt;&gt;Scanner: Stream SHA-256, MD5, SHA-1 hashing (64KB blocks)
+    Scanner-&gt;&gt;DB: Batch insert records into migration_manifest (status=&#x27;PENDING&#x27;)
+
+    Note over Worker,Vault: PHASE 2 &amp; 3: INGESTION &amp; READBACK
+    Worker-&gt;&gt;DB: Fetch PENDING manifest items
+    Worker-&gt;&gt;Legacy: Read source image bytes
+    Worker-&gt;&gt;Worker: Generate 768-dim SigLIP embedding vector
+    Worker-&gt;&gt;Vault: Write 256px WebP thumbnail (Keyframe_Vault/thumbs_256px/)
+    Worker-&gt;&gt;Vault: Copy physical file (Media_Vault/images/{h1}/{h2}/{sha256}.ext)
+    Worker-&gt;&gt;Vault: Readback Verification: Compute destination_sha256 from disk
+    
+    alt Readback Match (dest_sha256 == source_sha256)
+        Worker-&gt;&gt;DB: Insert media_assets &amp; media_embeddings (pgvector)
+        Worker-&gt;&gt;DB: Insert case_evidence_items (original path provenance)
+        Worker-&gt;&gt;DB: Update manifest status = &#x27;VERIFIED_COPIED&#x27;
+    else Readback Mismatch / Corrupt
+        Worker-&gt;&gt;DB: Update manifest status = &#x27;FAILED_CORRUPT&#x27;
+    end</code></pre>
+<hr>
+<h3>Phase 1: Read-Only Discovery & Manifest Ledgering</h3>
+<h4>Technical Objective:</h4>
+<p>Traverse legacy file systems, compute 3 cryptographic fingerprints per file, and establish an immutable migration manifest ledger.</p>
+<ul>
+<li><strong>Tool:</strong> <code>scripts/filesystem-migration/scan_legacy_manifest.py</code></li>
+<li><strong>Memory Safety:</strong> Hashing uses 64KB chunked streams (<code>iter(lambda: f.read(65536), b"")</code>), consuming $<10\text{ MB}$ RAM even for 50GB video containers.</li>
+<li><strong>Captured Fields:</strong></li>
+<li><code>source_filepath</code>: Absolute source path (Unique constraint).</li>
+<li><code>source_filename</code>: Original file name (e.g. <code>PHOTO-2024-04-18.jpg</code>).</li>
+<li><code>source_parent_dir</code>: Immediate folder name (e.g. <code>Case_102</code>).</li>
+<li><code>file_size_bytes</code>: Byte count on disk.</li>
+<li><code>sha256</code>, <code>md5</code>, <code>sha1</code>: Cryptographic checksums.</li>
+<li><code>status</code>: Initialized to <code>PENDING</code>.</li>
+</ul>
+<pre><code class="language-bash">python3 scripts/filesystem-migration/scan_legacy_manifest.py --source-dir /path/to/legacy-storage</code></pre>
+<hr>
+<h3>Phase 2: AI Vector Embedding & Deterministic Hex Vault Copy</h3>
+<h4>Technical Objective:</h4>
+<p>Transform physical files into searchable vector assets and organize them in the 2-layer hex vault.</p>
+<ul>
+<li><strong>Tool:</strong> <code>scripts/filesystem-migration/migrate_vault_worker.py</code></li>
+<li><strong>AI Model:</strong> SigLIP (<code>google/siglip-base-patch16-224</code>) generating 768-dimensional L2-normalized vectors.</li>
+<li><strong>Fast Previews:</strong> Pre-computes 256px WebP thumbnails to avoid network lag when analysts browse large galleries.</li>
+<li><strong>Path Resolution:</strong></li>
+</ul>
+<pre><code class="language-text">  Media File:     01_Media_Vault/images/{sha256[0:2]}/{sha256[2:4]}/{sha256}.jpg
+  Thumbnail File: 02_Keyframe_Vault/thumbs_256px/{sha256[0:2]}/{sha256[2:4]}/{sha256}_thumb.webp</code></pre>
+<hr>
+<h3>Phase 3: Cryptographic Readback Verification & Deduplication</h3>
+<h4>Technical Objective:</h4>
+<p>Cryptographically prove that every copied file is bit-for-bit identical to the source before marking it complete, while eliminating duplicate storage waste.</p>
+<ul>
+<li><strong>Verification Handshake:</strong></li>
+</ul>
+<ol>
+<li>File is copied to destination.</li>
+<li>Worker re-opens the file from the destination disk and computes <code>destination_sha256</code>.</li>
+<li>Strict condition: <code>destination_sha256 == source_sha256</code> AND <code>destination_size == source_size</code>.</li>
+</ol>
+<ul>
+<li><strong>Automated Deduplication:</strong></li>
+<li>If a file with the same SHA-256 is encountered across multiple source folders or datasets, the physical file is stored <strong>only once</strong> in <code>media_assets</code>.</li>
+<li>Every original location and folder name is preserved independently in <code>case_evidence_items</code>.</li>
+</ul>
+<hr>
+<h3>Phase 4: Production Handover & Live Dashboard Monitoring</h3>
+<h4>Technical Objective:</h4>
+<p>Provide real-time visibility into the migration status and integrate with SYMPICS Desktop and Ingestion Studio.</p>
+<ul>
+<li><strong>Web UI Dashboard:</strong> <code>database/dashboard.py</code> running on port <code>8085</code>.</li>
+<li><strong>Real-Time View:</strong> Queries <code>v_migration_summary</code> reporting discovered files, verified copies, duplicate savings, and completion percentage.</li>
+<li><strong>Verification Certificate:</strong> Generates a timestamped JSON manifest certifying the integrity of the completed vault.</li>
+</ul>
+        </main>
+    </div>
+</body>
+</html>
