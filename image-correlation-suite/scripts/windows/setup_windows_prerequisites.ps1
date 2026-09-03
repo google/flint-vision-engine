@@ -144,5 +144,5 @@ Write-Host "`n==================================================================
 Write-Host " [+] WINDOWS SETUP COMPLETE!" -ForegroundColor Green
 Write-Host "===============================================================================" -ForegroundColor Cyan
 Write-Host " To start SYMPICS Studio at any time, simply double-click:"
-Write-Host "   $ProjectRoot\start_studio.bat" -ForegroundColor Yellow
+Write-Host "   $ProjectRoot\launchers\start_studio.bat" -ForegroundColor Yellow
 Write-Host "==============================================================================="

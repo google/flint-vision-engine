@@ -237,6 +237,7 @@ blockquote {
 │   └── maintenance/                   # Vault integrity &amp; anti-bit rot scrubber
 │
 ├── web/                               # Web frontend UI (HTML/CSS/JS) &amp; REST API server
+├── launchers/                         # Windows 1-click batch launchers (Studio, Daemons, Ingestion)
 ├── tests/                             # Automated test suite (unit &amp; integration with pytest)
 ├── systemd/                           # Enterprise systemd service templates
 ├── pyproject.toml                     # Python package build specifications (PEP 517/621)
@@ -264,19 +265,19 @@ blockquote {
 <pre><code class="language-bash">pytest -v</code></pre>
 <h3>3. Start Web UI & REST API Server (Port 8080)</h3>
 <ul>
-<li><strong>Windows (1-Click):</strong> Double-click <code>start_studio.bat</code> (starts server and opens <code>http://localhost:8080</code>).</li>
+<li><strong>Windows (1-Click):</strong> Double-click <code>launchers\start_studio.bat</code> (starts server and opens <code>http://localhost:8080</code>).</li>
 <li><strong>Windows 24/7 Supervisor Service:</strong> Right-click <code>scripts\windows\install_windows_supervisor_task.bat</code> and run as Admin (auto-restarts web & intake daemons if they ever crash).</li>
 <li><strong>Linux / macOS:</strong></li>
 </ul>
 <pre><code class="language-bash">  python3 web/server.py</code></pre>
 <h3>4. Run Vault Ingestion & Migration</h3>
 <ul>
-<li><strong>Windows (1-Click Launchers):</strong></li>
+<li><strong>Windows (1-Click Launchers in <code>launchers/</code>):</strong></li>
 </ul>
 <ol>
-<li><code>build_vault.bat</code> — Pre-allocates 65,536 hex buckets in <code>future-lan-storage</code>.</li>
-<li><code>scan_manifest.bat</code> — Phase 1 100% read-only discovery scan.</li>
-<li><code>migrate_vault.bat</code> — Phase 2 supervised parallel AI embedding & verified CAS copy.</li>
+<li><code>launchers\build_vault.bat</code> — Pre-allocates 65,536 hex buckets in <code>future-lan-storage</code>.</li>
+<li><code>launchers\scan_manifest.bat</code> — Phase 1 100% read-only discovery scan.</li>
+<li><code>launchers\migrate_vault.bat</code> — Phase 2 supervised parallel AI embedding & verified CAS copy.</li>
 </ol>
 <ul>
 <li><strong>Linux / macOS:</strong></li>

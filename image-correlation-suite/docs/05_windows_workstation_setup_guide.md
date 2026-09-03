@@ -79,7 +79,7 @@ python database\init_database.py
 Enter your PostgreSQL password when prompted. The wizard creates the database and tests `pgvector` connectivity.
 
 #### Step 5: Transfer Offline AI Model Weights (Air-Gap Setup)
-1. On an internet-connected computer, double-click **`download_models.bat`** (or run `python scripts\maintenance\download_offline_models.py --target-dir models --models all`).
+1. On an internet-connected computer, double-click **`launchers\download_models.bat`** (or run `python scripts\maintenance\download_offline_models.py --target-dir models --models all`).
 2. Copy the resulting **`models\`** folder to an encrypted USB drive.
 3. Paste the **`models\`** folder directly into the root of `image-correlation-suite\` on the target workstation:
    ```text
@@ -99,11 +99,11 @@ Enter your PostgreSQL password when prompted. The wizard creates the database an
 Once installation is complete, operators never need to use terminal commands:
 
 #### 1. Launch Studio (Web UI)
-* **Double-click `start_studio.bat`** in the project root folder.
+* **Double-click `launchers\start_studio.bat`**.
 * This automatically checks that PostgreSQL is active, starts the web server, and opens your default browser to **`http://localhost:8080`**.
 
 #### 2. Launch the Automated Intake Daemon (Optional)
-* **Double-click `start_intake_daemon.bat`**.
+* **Double-click `launchers\start_intake_daemon.bat`**.
 * This monitors your ingestion drop folder (`future-lan-storage/03_Ingestion_Staging`) and automatically processes new files or camera RAW images in real time.
 
 #### 3. Setup Persistent 24/7 Auto-Restarting Daemons (Supervisor Service)

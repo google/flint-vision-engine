@@ -4,14 +4,14 @@
 
 setlocal enabledelayedexpansion
 
-title SYMPICS Forensic Intelligence Studio
+title SYMPICS Correlation Studio
 
 echo ===============================================================================
-echo  [*] STARTING SYMPICS FORENSIC STUDIO
+echo  [*] STARTING SYMPICS CORRELATION STUDIO
 echo ===============================================================================
 
-:: 1. Navigate to Project Directory
-cd /d "%~dp0"
+:: 1. Navigate to Project Root Directory
+cd /d "%~dp0\.."
 
 :: 2. Check and start PostgreSQL Service if present
 sc query "postgresql-x64-16" >nul 2>&1
