@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYMPICS Documentation - 6. Git SOP & Training</title>
+    <style>
+
+:root {
+    --bg: #0f172a;
+    --card-bg: #1e293b;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --border: #334155;
+    --accent: #38bdf8;
+    --accent-hover: #0284c7;
+    --code-bg: #020617;
+    --code-border: #1e293b;
+    --table-header: #1e293b;
+    --table-stripe: #0f172a;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.6;
+    padding: 0;
+}
+
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 280px;
+    background: #090d16;
+    border-right: 1px solid var(--border);
+    padding: 24px 16px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.sidebar-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    letter-spacing: 0.5px;
+}
+
+.nav-item {
+    display: block;
+    padding: 8px 12px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+    transition: all 0.15s;
+}
+
+.nav-item:hover {
+    background: var(--card-bg);
+    color: var(--text-primary);
+}
+
+.nav-item.active {
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.content-wrapper {
+    margin-left: 280px;
+    flex: 1;
+    padding: 40px 60px;
+    max-width: 1100px;
+}
+
+h1 { font-size: 2.2rem; font-weight: 800; color: #fff; margin-bottom: 12px; border-bottom: 2px solid var(--accent); padding-bottom: 10px; }
+h2 { font-size: 1.5rem; font-weight: 700; color: var(--accent); margin-top: 32px; margin-bottom: 12px; }
+h3 { font-size: 1.2rem; font-weight: 600; color: #e2e8f0; margin-top: 24px; margin-bottom: 8px; }
+h4 { font-size: 1.05rem; font-weight: 600; color: #cbd5e1; margin-top: 18px; margin-bottom: 6px; }
+
+p { margin-bottom: 16px; color: #cbd5e1; }
+ul, ol { margin-bottom: 16px; padding-left: 24px; color: #cbd5e1; }
+li { margin-bottom: 6px; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+hr { border: 0; border-top: 1px solid var(--border); margin: 30px 0; }
+
+code {
+    font-family: "JetBrains Mono", Consolas, Monaco, "Courier New", monospace;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: #38bdf8;
+}
+
+pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+pre code {
+    background: transparent;
+    padding: 0;
+    color: #e2e8f0;
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+
+th, td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.92rem;
+}
+
+th {
+    background: var(--table-header);
+    color: #fff;
+    font-weight: 600;
+}
+
+tr:nth-child(even) {
+    background: var(--table-stripe);
+}
+
+blockquote {
+    border-left: 4px solid var(--accent);
+    padding: 10px 16px;
+    background: rgba(56, 189, 248, 0.05);
+    margin-bottom: 16px;
+    border-radius: 0 6px 6px 0;
+    color: #cbd5e1;
+}
+
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: rgba(56, 189, 248, 0.2);
+    color: var(--accent);
+}
+
+@media (max-width: 900px) {
+    .sidebar { display: none; }
+    .content-wrapper { margin-left: 0; padding: 20px; }
+}
+
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <nav class="sidebar">
+            <div class="sidebar-title">SYMPICS DOCUMENTATION</div>
+            <a class="nav-item" href="index.html">Overview & Quickstart</a>
+<a class="nav-item" href="01_executive_brief.html">1. Executive Brief</a>
+<a class="nav-item" href="02_migration_architecture.html">2. Four-Phase Migration</a>
+<a class="nav-item" href="03_cas_whitepaper.html">3. CAS Whitepaper</a>
+<a class="nav-item" href="04_quickstart_guide.html">4. Operations Manual</a>
+<a class="nav-item" href="05_windows_setup_guide.html">5. Windows Setup Guide</a>
+<a class="nav-item active" href="06_git_training.html">6. Git SOP & Training</a>
+        </nav>
+        <main class="content-wrapper">
+            <h1>Git & Repository Operations for Analysts & Engineers</h1>
+<h2>Standard Operating Procedure (SOP) & Training Manual</h2>
+<hr>
+<h3>Module 1: The Core Philosophy — Why We Use Git</h3>
+<p>In software engineering and data management, <strong>Git is our immutable audit trail</strong>. It guarantees that:</p>
+<ol>
+<li>We always maintain a single, uncorrupted <strong>Production Baseline (<code>main</code>)</strong>.</li>
+<li>No individual contributor can accidentally overwrite, delete, or break production code.</li>
+<li>Every single line of code is cryptographically signed, timestamped, and attributed to an author.</li>
+</ol>
+<hr>
+<h3>Module 2: The Enterprise Collaboration Model</h3>
+<table>
+<thead><tr>
+<th>Git Concept</th>
+<th>Operational Equivalent</th>
+<th>What It Does / Why It Matters</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong><code>main</code> (or <code>master</code>)</strong></td>
+<td><strong>Official Production Baseline</strong></td>
+<td>The permanent, production-ready source of truth. Unvetted draft changes are never pushed directly to main.</td>
+</tr>
+<tr>
+<td><strong><code>branch</code></strong></td>
+<td><strong>Isolated Working Copy / Sandbox</strong></td>
+<td>A personal branch where you can test ideas, add features, or refine code without touching production.</td>
+</tr>
+<tr>
+<td><strong><code>commit</code></strong></td>
+<td><strong>Time-Stamped Milestone</strong></td>
+<td>A saved checkpoint explaining <em>what</em> was changed and <em>why</em>.</td>
+</tr>
+<tr>
+<td><strong><code>git pull</code> / Sync</strong></td>
+<td><strong>Upstream Synchronization</strong></td>
+<td>Updating your local environment with the latest verified master files before starting work.</td>
+</tr>
+<tr>
+<td><strong><code>Pull Request (PR)</code></strong></td>
+<td><strong>Peer Review Submission</strong></td>
+<td>Submitting your finished work to peers and leads for review before it gets merged into the official repository.</td>
+</tr>
+<tr>
+<td><strong><code>CI (Automated Tests)</code></strong></td>
+<td><strong>Automated Gatekeeper</strong></td>
+<td>Automated digital test runner that checks for syntax errors, broken tests, and blocks accidental data/secret commits.</td>
+</tr>
+<tr>
+<td><strong><code>Merge</code></strong></td>
+<td><strong>Approved Production Integration</strong></td>
+<td>Incorporating the approved changes permanently into the master branch.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3>Module 3: The Three Golden Rules of the Repository</h3>
+<blockquote><strong>The 3 Golden Repository Rules:</strong></blockquote>
+<blockquote>1. <strong>Never Write Directly to Main:</strong> Always do work on a separate feature branch (e.g., <code>feature/new-filter</code>).</blockquote>
+<blockquote>2. <strong>Zero Media / Zero Spreadsheets / Zero Secrets:</strong> Git tracks code and documentation only. Never commit images, raw media, videos, Excel/CSV files, or API credentials to the repository.</blockquote>
+<blockquote>3. <strong>All Changes Merge via Pull Request (PR):</strong> Nothing enters the master file without an approved Pull Request and a green CI test checkmark.</blockquote>
+<hr>
+<h3>Module 4: Operating via Jetski Web (No Command-Line Required)</h3>
+<p>Because you are using <strong>Jetski Web</strong>, you never have to type complex terminal commands. You simply prompt Jetski using three standard phrases:</p>
+<pre><code class="language-mermaid">flowchart TD
+    A[&quot;PHASE 1: STARTING A TASK&lt;br/&gt;&#x27;Jetski, sync with main and create a branch named feature/xyz&#x27;&quot;] --&gt; B[&quot;PHASE 2: DOING THE WORK&lt;br/&gt;&#x27;Jetski, implement the feature and run pytest&#x27;&quot;]
+    B --&gt; C[&quot;PHASE 3: SUBMITTING WORK&lt;br/&gt;&#x27;Jetski, commit my changes, push, and open a Pull Request&#x27;&quot;]</code></pre>
+<h4>Step 1: Starting Any New Task</h4>
+<p>Before touching code, give Jetski this exact prompt:</p>
+<blockquote><em>"Jetski, please make sure my repository is updated with the latest <code>main</code> branch, and create a new working branch called <code>feature/<your-topic></code>."</em></blockquote>
+<h4>Step 2: Testing Before Submitting</h4>
+<p>Once your edits are made, give Jetski this quality check prompt:</p>
+<blockquote><em>"Jetski, run <code>pytest tests/</code> to verify all tests pass and ensure no media files or secrets are staged."</em></blockquote>
+<h4>Step 3: Submitting for Review</h4>
+<p>When ready for review and merge:</p>
+<blockquote><em>"Jetski, commit my changes with a clear summary, push my branch to GitHub, and give me the link to open a Pull Request for Eric."</em></blockquote>
+<hr>
+<h3>Module 5: Understanding the Pull Request (PR) Lifecycle</h3>
+<p>When you open a Pull Request on GitHub:</p>
+<ol>
+<li><strong>The Automated Gatekeeper (CI) Runs Automatically:</strong></li>
+</ol>
+<ul>
+<li>It spins up an isolated test container.</li>
+<li>It verifies that <strong>ZERO</strong> media files (<code>.jpg</code>, <code>.png</code>, <code>.cr3</code>) or tabular data (<code>.csv</code>, <code>.xlsx</code>) were included.</li>
+<li>It executes all 25 system tests.</li>
+</ul>
+<ol>
+<li><strong>Review & Approval:</strong></li>
+</ol>
+<ul>
+<li>Your collaborator reviews the diff (green additions, red removals).</li>
+<li>Once approved, the <strong>"Merge Pull Request"</strong> button is clicked.</li>
+</ul>
+<ol>
+<li><strong>Branch Cleanup:</strong></li>
+</ol>
+<ul>
+<li>The feature branch is automatically deleted, and the master file is now updated for everyone.</li>
+</ul>
+<hr>
+<h3>Quick Reference / Cheat Sheet for Daily Work</h3>
+<ul>
+<li><strong>Start of Day / New Task:</strong> Tell Jetski: <em>"Sync with main and create a new feature branch."</em></li>
+<li><strong>During Work:</strong> Make edits, test in the Web UI.</li>
+<li><strong>End of Task:</strong> Tell Jetski: <em>"Run tests, commit, push, and create a Pull Request."</em></li>
+<li><strong>Questions / Issues:</strong> If in doubt, ask before merging!</li>
+</ul>
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,24 @@
+[Unit]
+Description=SYMPICS High-Performance Web Studio & API Service
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=sympics
+WorkingDirectory=/opt/sympics/image-correlation-suite/web
+ExecStart=/usr/bin/python3 /opt/sympics/image-correlation-suite/web/server.py --port 8080
+
+Restart=always
+RestartSec=3s
+
+LimitNOFILE=65536
+Environment=PYTHONUNBUFFERED=1
+Environment=SYMPICS_PG_DB=sympics_db
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=sympics-web
+
+[Install]
+WantedBy=multi-user.target

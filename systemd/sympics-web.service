@@ -1,0 +1,16 @@
+[Unit]
+Description=SYMPICS Forensic Studio Web Server
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=sympics
+WorkingDirectory=/opt/sympics/image-correlation-suite
+ExecStart=/usr/bin/python3 web/server.py
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYMPICS Documentation - 5. Windows Setup Guide</title>
+    <style>
+
+:root {
+    --bg: #0f172a;
+    --card-bg: #1e293b;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --border: #334155;
+    --accent: #38bdf8;
+    --accent-hover: #0284c7;
+    --code-bg: #020617;
+    --code-border: #1e293b;
+    --table-header: #1e293b;
+    --table-stripe: #0f172a;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.6;
+    padding: 0;
+}
+
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 280px;
+    background: #090d16;
+    border-right: 1px solid var(--border);
+    padding: 24px 16px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.sidebar-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    letter-spacing: 0.5px;
+}
+
+.nav-item {
+    display: block;
+    padding: 8px 12px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+    transition: all 0.15s;
+}
+
+.nav-item:hover {
+    background: var(--card-bg);
+    color: var(--text-primary);
+}
+
+.nav-item.active {
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.content-wrapper {
+    margin-left: 280px;
+    flex: 1;
+    padding: 40px 60px;
+    max-width: 1100px;
+}
+
+h1 { font-size: 2.2rem; font-weight: 800; color: #fff; margin-bottom: 12px; border-bottom: 2px solid var(--accent); padding-bottom: 10px; }
+h2 { font-size: 1.5rem; font-weight: 700; color: var(--accent); margin-top: 32px; margin-bottom: 12px; }
+h3 { font-size: 1.2rem; font-weight: 600; color: #e2e8f0; margin-top: 24px; margin-bottom: 8px; }
+h4 { font-size: 1.05rem; font-weight: 600; color: #cbd5e1; margin-top: 18px; margin-bottom: 6px; }
+
+p { margin-bottom: 16px; color: #cbd5e1; }
+ul, ol { margin-bottom: 16px; padding-left: 24px; color: #cbd5e1; }
+li { margin-bottom: 6px; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+hr { border: 0; border-top: 1px solid var(--border); margin: 30px 0; }
+
+code {
+    font-family: "JetBrains Mono", Consolas, Monaco, "Courier New", monospace;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: #38bdf8;
+}
+
+pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+pre code {
+    background: transparent;
+    padding: 0;
+    color: #e2e8f0;
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+
+th, td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.92rem;
+}
+
+th {
+    background: var(--table-header);
+    color: #fff;
+    font-weight: 600;
+}
+
+tr:nth-child(even) {
+    background: var(--table-stripe);
+}
+
+blockquote {
+    border-left: 4px solid var(--accent);
+    padding: 10px 16px;
+    background: rgba(56, 189, 248, 0.05);
+    margin-bottom: 16px;
+    border-radius: 0 6px 6px 0;
+    color: #cbd5e1;
+}
+
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: rgba(56, 189, 248, 0.2);
+    color: var(--accent);
+}
+
+@media (max-width: 900px) {
+    .sidebar { display: none; }
+    .content-wrapper { margin-left: 0; padding: 20px; }
+}
+
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <nav class="sidebar">
+            <div class="sidebar-title">SYMPICS DOCUMENTATION</div>
+            <a class="nav-item" href="index.html">Overview & Quickstart</a>
+<a class="nav-item" href="01_executive_brief.html">1. Executive Brief</a>
+<a class="nav-item" href="02_migration_architecture.html">2. Four-Phase Migration</a>
+<a class="nav-item" href="03_cas_whitepaper.html">3. CAS Whitepaper</a>
+<a class="nav-item" href="04_quickstart_guide.html">4. Operations Manual</a>
+<a class="nav-item active" href="05_windows_setup_guide.html">5. Windows Setup Guide</a>
+<a class="nav-item" href="06_git_training.html">6. Git SOP & Training</a>
+        </nav>
+        <main class="content-wrapper">
+            <h1>SYMPICS Windows Workstation Setup Guide</h1>
+<h2>Complete Installation Manual for Barebones Windows Systems</h2>
+<hr>
+<h3>Overview</h3>
+<p>This guide provides step-by-step instructions for setting up the <strong>SYMPICS Intelligent Media Platform</strong> on a fresh Windows workstation (Windows 10, 11, or Windows Server) that does <strong>not</strong> have PostgreSQL or AI dependencies pre-installed.</p>
+<hr>
+<h3>Prerequisites Checklist</h3>
+<ul>
+<li><strong>Operating System:</strong> Windows 10 / 11 (64-bit) or Windows Server 2019 / 2022.</li>
+<li><strong>Hardware:</strong> 16GB+ RAM (128GB recommended for massive scale) + SSD / NVMe drive.</li>
+<li><strong>Python:</strong> Python 3.10, 3.11, 3.12, or 3.13 (Ensure "Add Python to PATH" is checked during install).</li>
+<li><strong>NVIDIA GPU (Optional):</strong> NVIDIA RTX GPU with latest drivers for CUDA hardware acceleration.</li>
+</ul>
+<hr>
+<h3>Method 1: Automated Setup (Fastest / Recommended)</h3>
+<p>We have provided an automated PowerShell setup script that installs PostgreSQL 16, configures the <code>pgvector</code> AI extension, builds your Python virtual environment, and initializes the database in a single run.</p>
+<h4>Step 1: Open PowerShell as Administrator</h4>
+<ol>
+<li>Press the Windows Key and type <strong>PowerShell</strong>.</li>
+<li>Right-click <strong>Windows PowerShell</strong> and select <strong>Run as administrator</strong>.</li>
+</ol>
+<h4>Step 2: Run the Setup Script</h4>
+<p>Navigate to the extracted <code>image-correlation-suite</code> directory and execute:</p>
+<pre><code class="language-powershell">Set-ExecutionPolicy Bypass -Scope Process -Force
+.\scripts\windows\setup_windows_prerequisites.ps1</code></pre>
+<h4>What this script does automatically:</h4>
+<ol>
+<li>Checks for and installs <strong>PostgreSQL 16</strong> via <code>winget</code> or direct silent installer.</li>
+<li>Starts the <code>postgresql-x64-16</code> Windows service.</li>
+<li>Downloads and installs the pre-compiled <strong><code>pgvector</code></strong> Windows binaries into PostgreSQL.</li>
+<li>Creates a Python virtual environment (<code>.\venv</code>) and installs all required dependencies.</li>
+<li>Runs the schema initialization wizard to create <code>sympics_db</code> and vector indexes.</li>
+</ol>
+<hr>
+<h3>Method 2: Manual Step-by-Step Installation</h3>
+<p>If your IT policies restrict automated PowerShell package downloads, follow these manual steps:</p>
+<h4>Step 1: Install PostgreSQL 16</h4>
+<ol>
+<li>Download the official installer: <a href="https://www.enterprisedb.com/downloads/postgres-postgresql-downloads">EnterpriseDB PostgreSQL 16 Windows Installer</a>.</li>
+<li>Run the <code>.exe</code> installer.</li>
+<li>Keep default installation path (<code>C:\Program Files\PostgreSQL\16</code>).</li>
+<li>Select components: <strong>PostgreSQL Server</strong>, <strong>pgAdmin 4</strong>, and <strong>Command Line Tools</strong>.</li>
+<li>Set a password for the <code>postgres</code> superuser (e.g. <code>sympics_secure_password</code>). Keep Port at <code>5432</code>.</li>
+<li>Complete the installation.</li>
+</ol>
+<h4>Step 2: Install the <code>pgvector</code> AI Extension</h4>
+<p>Because PostgreSQL for Windows does not include <code>pgvector</code> by default:</p>
+<ol>
+<li>Download the pre-compiled Windows release from GitHub: <a href="https://github.com/pgvector/pgvector/releases">pgvector Releases</a> (e.g., <code>pgvector_v0.8.0_pg16_windows_x64.zip</code>).</li>
+<li>Extract the ZIP archive.</li>
+<li>Copy the files into your PostgreSQL directory:</li>
+</ol>
+<ul>
+<li>Copy <code>lib\vector.dll</code> $\rightarrow$ <code>C:\Program Files\PostgreSQL\16\lib\</code></li>
+<li>Copy <code>share\extension\vector.control</code> and <code>share\extension\vector--*.sql</code> $\rightarrow$ <code>C:\Program Files\PostgreSQL\16\share\extension\</code></li>
+</ul>
+<h4>Step 3: Setup Python Virtual Environment</h4>
+<p>Open Command Prompt in <code>image-correlation-suite</code>:</p>
+<pre><code class="language-cmd">python -m venv venv
+venv\Scripts\activate
+pip install -e .</code></pre>
+<h4>Step 4: Initialize the Database Schemas</h4>
+<p>Run the interactive database creation wizard:</p>
+<pre><code class="language-cmd">python database\init_database.py</code></pre>
+<p>Enter your PostgreSQL password when prompted. The wizard creates the database and tests <code>pgvector</code> connectivity.</p>
+<h4>Step 5: Transfer Offline AI Model Weights (Air-Gap Setup)</h4>
+<ol>
+<li>On an internet-connected computer, double-click <strong><code>download_models.bat</code></strong> (or run <code>python scripts\maintenance\download_offline_models.py --target-dir models --models all</code>).</li>
+<li>Copy the resulting <strong><code>models\</code></strong> folder to an encrypted USB drive.</li>
+<li>Paste the <strong><code>models\</code></strong> folder directly into the root of <code>image-correlation-suite\</code> on the target workstation:</li>
+</ol>
+<pre><code class="language-text">   image-correlation-suite\
+   └── models\
+       ├── siglip2-base-patch16-naflex\
+       ├── siglip-base-patch16-224\
+       └── clip-vit-base-patch32\</code></pre>
+<p><em>(The server and intake daemon will automatically detect and load from <code>models\</code> in 100% offline mode).</em></p>
+<p><em>(Note for Meta DINOv3: DINOv3 is a gated model requiring a Hugging Face token. See <a href="04_analyst_and_operator_quickstart_guide.md#3-special-procedure-for-meta-dinov3-gated-model-approval">Operations Manual</a> for the 4-step approval instructions. SigLIP-2, SigLIP Base, and CLIP require zero tokens or approval).</em></p>
+<hr>
+<h3>Day-to-Day Operation (1-Click Launchers)</h3>
+<p>Once installation is complete, operators never need to use terminal commands:</p>
+<h4>1. Launch Studio (Web UI)</h4>
+<ul>
+<li><strong>Double-click <code>start_studio.bat</code></strong> in the project root folder.</li>
+<li>This automatically checks that PostgreSQL is active, starts the web server, and opens your default browser to <strong><code>http://localhost:8080</code></strong>.</li>
+</ul>
+<h4>2. Launch the Automated Intake Daemon (Optional)</h4>
+<ul>
+<li><strong>Double-click <code>start_intake_daemon.bat</code></strong>.</li>
+<li>This monitors your ingestion drop folder (<code>future-lan-storage/03_Ingestion_Staging</code>) and automatically processes new files or camera RAW images in real time.</li>
+</ul>
+<h4>3. Setup Persistent 24/7 Auto-Restarting Daemons (Supervisor Service)</h4>
+<ul>
+<li><strong>Right-click <code>scripts\windows\install_windows_supervisor_task.bat</code> and select 'Run as Administrator'</strong>.</li>
+<li>This registers <code>sympics_service_supervisor.ps1</code> as a permanent Windows Scheduled Task that:</li>
+</ul>
+<ol>
+<li>Starts automatically whenever the Windows workstation boots.</li>
+<li>Runs both the Web Server and Intake Daemon in the background.</li>
+<li>Actively health-checks both processes every 5 seconds.</li>
+<li>Automatically restarts them if they crash, hang, or stop responding.</li>
+</ol>
+<ul>
+<li>To uninstall or disable: Right-click <code>scripts\windows\uninstall_windows_supervisor_task.bat</code> and Run as Administrator.</li>
+</ul>
+<hr>
+<h3>Troubleshooting Windows Deployments</h3>
+<table>
+<thead><tr>
+<th>Issue</th>
+<th>Cause</th>
+<th>Solution</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>"Python was not found"</strong></td>
+<td>Python is not on system PATH.</td>
+<td>Re-run Python installer and ensure <strong>"Add python.exe to PATH"</strong> is checked.</td>
+</tr>
+<tr>
+<td><strong>"Could not connect to server"</strong></td>
+<td>PostgreSQL service stopped.</td>
+<td>Open Command Prompt as Admin and run: <code>net start postgresql-x64-16</code>.</td>
+</tr>
+<tr>
+<td><strong>"Extension 'vector' not found"</strong></td>
+<td><code>vector.dll</code> not in PostgreSQL <code>lib\</code>.</td>
+<td>Verify <code>vector.dll</code> is inside <code>C:\Program Files\PostgreSQL\16\lib\</code>.</td>
+</tr>
+<tr>
+<td><strong>"Permission Denied" in PowerShell</strong></td>
+<td>Windows script execution policy.</td>
+<td>Run <code>Set-ExecutionPolicy Bypass -Scope Process -Force</code> before running scripts.</td>
+</tr>
+</tbody>
+</table>
+        </main>
+    </div>
+</body>
+</html>

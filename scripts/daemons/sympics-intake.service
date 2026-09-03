@@ -1,0 +1,31 @@
+[Unit]
+Description=SYMPICS Automated Server Intake & Multi-Model AI Daemon
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=sympics
+Group=sympics
+WorkingDirectory=/opt/sympics/image-correlation-suite/scripts/daemons
+ExecStart=/usr/bin/python3 /opt/sympics/image-correlation-suite/scripts/daemons/sympics_intake_daemon.py \
+    --staging-dir /opt/sympics/data/03_Ingestion_Staging \
+    --vault-dir /opt/sympics/data \
+    --poll-interval 2.0 \
+    --stability-delay 2.0
+
+Restart=always
+RestartSec=5s
+
+# Resource Limits
+LimitNOFILE=65536
+Environment=PYTHONUNBUFFERED=1
+Environment=SYMPICS_PG_DB=sympics_db
+
+# Standard Output Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=sympics-intake
+
+[Install]
+WantedBy=multi-user.target

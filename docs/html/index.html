@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYMPICS Documentation - Overview & Quickstart</title>
+    <style>
+
+:root {
+    --bg: #0f172a;
+    --card-bg: #1e293b;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --border: #334155;
+    --accent: #38bdf8;
+    --accent-hover: #0284c7;
+    --code-bg: #020617;
+    --code-border: #1e293b;
+    --table-header: #1e293b;
+    --table-stripe: #0f172a;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.6;
+    padding: 0;
+}
+
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 280px;
+    background: #090d16;
+    border-right: 1px solid var(--border);
+    padding: 24px 16px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.sidebar-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    letter-spacing: 0.5px;
+}
+
+.nav-item {
+    display: block;
+    padding: 8px 12px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+    transition: all 0.15s;
+}
+
+.nav-item:hover {
+    background: var(--card-bg);
+    color: var(--text-primary);
+}
+
+.nav-item.active {
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.content-wrapper {
+    margin-left: 280px;
+    flex: 1;
+    padding: 40px 60px;
+    max-width: 1100px;
+}
+
+h1 { font-size: 2.2rem; font-weight: 800; color: #fff; margin-bottom: 12px; border-bottom: 2px solid var(--accent); padding-bottom: 10px; }
+h2 { font-size: 1.5rem; font-weight: 700; color: var(--accent); margin-top: 32px; margin-bottom: 12px; }
+h3 { font-size: 1.2rem; font-weight: 600; color: #e2e8f0; margin-top: 24px; margin-bottom: 8px; }
+h4 { font-size: 1.05rem; font-weight: 600; color: #cbd5e1; margin-top: 18px; margin-bottom: 6px; }
+
+p { margin-bottom: 16px; color: #cbd5e1; }
+ul, ol { margin-bottom: 16px; padding-left: 24px; color: #cbd5e1; }
+li { margin-bottom: 6px; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+hr { border: 0; border-top: 1px solid var(--border); margin: 30px 0; }
+
+code {
+    font-family: "JetBrains Mono", Consolas, Monaco, "Courier New", monospace;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: #38bdf8;
+}
+
+pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+pre code {
+    background: transparent;
+    padding: 0;
+    color: #e2e8f0;
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+
+th, td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.92rem;
+}
+
+th {
+    background: var(--table-header);
+    color: #fff;
+    font-weight: 600;
+}
+
+tr:nth-child(even) {
+    background: var(--table-stripe);
+}
+
+blockquote {
+    border-left: 4px solid var(--accent);
+    padding: 10px 16px;
+    background: rgba(56, 189, 248, 0.05);
+    margin-bottom: 16px;
+    border-radius: 0 6px 6px 0;
+    color: #cbd5e1;
+}
+
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: rgba(56, 189, 248, 0.2);
+    color: var(--accent);
+}
+
+@media (max-width: 900px) {
+    .sidebar { display: none; }
+    .content-wrapper { margin-left: 0; padding: 20px; }
+}
+
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <nav class="sidebar">
+            <div class="sidebar-title">SYMPICS DOCUMENTATION</div>
+            <a class="nav-item active" href="index.html">Overview & Quickstart</a>
+<a class="nav-item" href="01_executive_brief.html">1. Executive Brief</a>
+<a class="nav-item" href="02_migration_architecture.html">2. Four-Phase Migration</a>
+<a class="nav-item" href="03_cas_whitepaper.html">3. CAS Whitepaper</a>
+<a class="nav-item" href="04_quickstart_guide.html">4. Operations Manual</a>
+<a class="nav-item" href="05_windows_setup_guide.html">5. Windows Setup Guide</a>
+<a class="nav-item" href="06_git_training.html">6. Git SOP & Training</a>
+        </nav>
+        <main class="content-wrapper">
+            <h1>SYMPICS Intelligent Media & Correlation Platform</h1>
+<p>SYMPICS is an enterprise-grade digital media ingestion, multi-model AI vision search, and Content-Addressed Storage (CAS) vault platform designed for high-throughput asset triage, multi-modal search, and large-scale media archives.</p>
+<hr>
+<h2>[*] Key Architecture & Features</h2>
+<pre><code class="language-mermaid">graph TD
+    A[&quot;Staging Drop &amp; Legacy Archives&lt;br/&gt;(03_Ingestion_Staging, ZIP, TAR)&quot;] --&gt; B[&quot;Intake Daemons &amp; Migration Workers&lt;br/&gt;(Hardware Auto-Tuned Pool)&quot;]
+    
+    B --&gt; C[&quot;Cryptographic Integrity Engine&lt;br/&gt;(Simultaneous SHA-256, MD5, SHA-1)&quot;]
+    B --&gt; D[&quot;Camera RAW Extractor&lt;br/&gt;(CR3, CR2, NEF, ARW, DNG, RAF)&quot;]
+    B --&gt; E[&quot;EXIF &amp; GPS Parser&lt;br/&gt;(DMS-to-Decimal Coordinates)&quot;]
+    
+    C --&gt; F[&quot;2-Layer CAS Hex Vault&lt;br/&gt;(01_Media_Vault/images/ab/cd/...)&quot;]
+    D --&gt; G[&quot;256px WebP Thumbnailer&lt;br/&gt;(02_Keyframe_Vault/thumbs_256px/...)&quot;]
+    
+    D --&gt; H[&quot;Multi-Model AI Vision Engine&lt;br/&gt;(CLIP 512d + SigLIP 768d + SigLIP-2 NaFlex 768d)&quot;]
+    
+    H --&gt; I[&quot;PostgreSQL + pgvector&lt;br/&gt;(HNSW Cosine Vector Indexing)&quot;]
+    F --&gt; I
+    G --&gt; I
+    E --&gt; I
+    
+    I --&gt; J[&quot;SYMPICS Studio (WebUI &amp; REST API)&lt;br/&gt;(Port 8080 - Search, Series, Datasets, SQL Sandbox)&quot;]</code></pre>
+<ul>
+<li><strong>Multi-Model AI Vision Search:</strong> Tri-vector semantic embedding using <strong>CLIP ViT-B/32 (512d)</strong>, <strong>SigLIP Base (768d)</strong>, and <strong>SigLIP-2 NaFlex (768d)</strong> with PostgreSQL <code>pgvector</code> HNSW indexes.</li>
+<li><strong>Content-Addressed Storage (CAS):</strong> Strict 2-layer hex directory partitioning (<code>01_Media_Vault/images/xx/yy/<sha256>.ext</code>) preventing directory scale degradation and enabling bit-for-bit deduplication.</li>
+<li><strong>Camera RAW Support:</strong> Pure-Python in-stream embedded preview extraction for Canon (<code>.CR3</code>, <code>.CR2</code>), Nikon (<code>.NEF</code>), Sony (<code>.ARW</code>), Adobe (<code>.DNG</code>), and Fuji (<code>.RAF</code>) camera RAW files in ~200ms.</li>
+<li><strong>Dynamic Hardware Auto-Scaling:</strong> Auto-detects NVIDIA CUDA GPU VRAM, Apple Silicon MPS, or multi-core CPUs and auto-tunes worker pools and batch sizes.</li>
+<li><strong>Security Hardening:</strong> Read-only transaction isolation for SQL Explorer, AST destructive command blocking, Zip Slip directory traversal defenses, and CORS origin restrictions.</li>
+<li><strong>Anti-Bit Rot Scrubbing:</strong> Background cryptographic scrubber (<code>sympics-scrubber</code>) validating physical files against stored SHA-256 ledgers.</li>
+</ul>
+<hr>
+<h2>Repository Structure</h2>
+<pre><code class="language-text">image-correlation-suite/
+├── sympics/                             # Root Python package (installable via pip install -e .)
+│   ├── core/                          # Hashing, CAS vaulting, EXIF/GPS, RAW extraction, Archive security
+│   ├── ai/                            # Multi-model vision embedder &amp; 256px WebP thumbnailer
+│   ├── database/                      # Connection pooling &amp; pgvector operations
+│   ├── daemons/                       # Persistent background intake watchers
+│   ├── migration/                     # Discovery scanner &amp; high-speed ingestion workers
+│   └── web/                           # REST API &amp; static streaming server
+│
+├── database/                          # SQL DDL schemas and database utilities
+├── scripts/
+│   ├── daemons/                       # SYMPICS staging intake daemon
+│   ├── filesystem-migration/          # 4-phase legacy manifest scanner &amp; worker
+│   └── maintenance/                   # Vault integrity &amp; anti-bit rot scrubber
+│
+├── web/                               # Web frontend UI (HTML/CSS/JS) &amp; REST API server
+├── tests/                             # Automated test suite (unit &amp; integration with pytest)
+├── systemd/                           # Enterprise systemd service templates
+├── pyproject.toml                     # Python package build specifications (PEP 517/621)
+├── setup.py                           # Setuptools package installer
+├── .pre-commit-config.yaml            # Pre-commit linting &amp; security hook configurations
+└── .env.example                       # Environment variables configuration template</code></pre>
+<hr>
+<h2>Quickstart</h2>
+<h3>1. Installation</h3>
+<ul>
+<li><strong>Windows Systems (Automated Setup):</strong> Open PowerShell as Administrator and run:</li>
+</ul>
+<pre><code class="language-powershell">  Set-ExecutionPolicy Bypass -Scope Process -Force
+  .\scripts\windows\setup_windows_prerequisites.ps1</code></pre>
+<p><em>(See <a href="docs/05_windows_workstation_setup_guide.html">Windows Setup Guide</a> for full walkthrough).</em></p>
+<ul>
+<li><strong>Linux / macOS Systems:</strong></li>
+</ul>
+<pre><code class="language-bash">  # Clone the repository and install editable package
+  git clone &lt;internal-repo-url&gt; image-correlation-suite
+  cd image-correlation-suite
+  pip install -e .
+  python3 database/init_database.py</code></pre>
+<h3>2. Run Tests</h3>
+<pre><code class="language-bash">pytest -v</code></pre>
+<h3>3. Start Web UI & REST API Server (Port 8080)</h3>
+<ul>
+<li><strong>Windows (1-Click):</strong> Double-click <code>start_studio.bat</code> (starts server and opens <code>http://localhost:8080</code>).</li>
+<li><strong>Windows 24/7 Supervisor Service:</strong> Right-click <code>scripts\windows\install_windows_supervisor_task.bat</code> and run as Admin (auto-restarts web & intake daemons if they ever crash).</li>
+<li><strong>Linux / macOS:</strong></li>
+</ul>
+<pre><code class="language-bash">  python3 web/server.py</code></pre>
+<h3>4. Run Vault Ingestion & Migration</h3>
+<ul>
+<li><strong>Windows (1-Click Launchers):</strong></li>
+</ul>
+<ol>
+<li><code>build_vault.bat</code> — Pre-allocates 65,536 hex buckets in <code>future-lan-storage</code>.</li>
+<li><code>scan_manifest.bat</code> — Phase 1 100% read-only discovery scan.</li>
+<li><code>migrate_vault.bat</code> — Phase 2 supervised parallel AI embedding & verified CAS copy.</li>
+</ol>
+<ul>
+<li><strong>Linux / macOS:</strong></li>
+</ul>
+<pre><code class="language-bash">  # Pre-allocate CAS vault buckets
+  python3 scripts/filesystem-migration/build_hex_vault_structure.py -t future-lan-storage
+
+  # Phase 1: Read-Only Discovery Scan
+  python3 scripts/filesystem-migration/scan_legacy_manifest.py -s future-lan-storage/03_Ingestion_Staging
+
+  # Phase 2: Supervised Parallel Ingestion (Auto-scales across CPU/GPU)
+  python3 scripts/filesystem-migration/migrate_vault_worker.py -v future-lan-storage</code></pre>
+<h3>5. Clean Slate Protocol (System Reset)</h3>
+<p>To clear all indexed media records and reset the storage directories to an initial pristine state:</p>
+<ul>
+<li><strong>Windows (1-Click):</strong> Double-click <code>scripts\clean-slate\run_clean_slate.bat</code> (includes confirmation safety check).</li>
+<li><strong>Linux / macOS:</strong></li>
+</ul>
+<pre><code class="language-bash">  python3 scripts/clean-slate/clean_slate_protocol.py</code></pre>
+<h3>6. Run Vault Integrity Scrubber</h3>
+<pre><code class="language-bash">python3 scripts/maintenance/scrub_vault_integrity.py</code></pre>
+<hr>
+<h2>AI Vision Models & Air-Gapped Deployment</h2>
+<p>SYMPICS utilizes a multi-model ensemble for semantic and crop similarity search. When operating in an air-gapped environment without internet access, pre-download the weights using the automated provisioning tool:</p>
+<h3>1. Download Model Weights (on an internet-connected machine)</h3>
+<pre><code class="language-bash"># Download all models into ./models
+python3 scripts/maintenance/download_offline_models.py --target-dir ./models --models all
+
+# Or package directly into a portable archive for USB/LAN transfer:
+python3 scripts/maintenance/download_offline_models.py --create-tar sympics-offline-models.tar.gz</code></pre>
+<h3>2. Supported Model Registry</h3>
+<table>
+<thead><tr>
+<th>Model</th>
+<th>Hugging Face Repository</th>
+<th>Dimension</th>
+<th>License</th>
+<th>Access</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>SigLIP Base</strong></td>
+<td><a href="https://huggingface.co/google/siglip-base-patch16-224"><code>google/siglip-base-patch16-224</code></a></td>
+<td>768-dim</td>
+<td>Apache 2.0</td>
+<td>Open Access</td>
+</tr>
+<tr>
+<td><strong>SigLIP-2 NaFlex</strong></td>
+<td><a href="https://huggingface.co/google/siglip2-base-patch16-naflex"><code>google/siglip2-base-patch16-naflex</code></a></td>
+<td>768-dim</td>
+<td>Apache 2.0</td>
+<td>Open Access</td>
+</tr>
+<tr>
+<td><strong>CLIP ViT-B/32</strong></td>
+<td><a href="https://huggingface.co/openai/clip-vit-base-patch32"><code>openai/clip-vit-base-patch32</code></a></td>
+<td>512-dim</td>
+<td>MIT</td>
+<td>Open Access</td>
+</tr>
+<tr>
+<td><strong>DINOv3 ViT-B/16</strong></td>
+<td><a href="https://huggingface.co/facebook/dinov3-vit-b-16"><code>facebook/dinov3-vit-b-16</code></a></td>
+<td>768-dim</td>
+<td>Meta</td>
+<td>Gated (Requires HF approval)</td>
+</tr>
+</tbody>
+</table>
+<h3>3. Deploy to Air-Gapped Server</h3>
+<p>Copy the <code>models/</code> directory into the project root or specify <code>SYMPICS_MODELS_DIR=/path/to/models</code> in your <code>.env</code>. The platform will automatically load directly from disk with zero external network calls.</p>
+        </main>
+    </div>
+</body>
+</html>
