@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FLINT - Edge Vision Engine</title>
+  <link rel="stylesheet" href="/static/style.css?v=20260904_108" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="dark-theme">
+
+  <!-- TOP APP HEADER -->
+  <header class="app-header">
+    <div class="header-left">
+      <!-- Home Button -->
+      <button id="btnNavHome" class="btn-home" onclick="showIndexView()" title="Return to FLINT - Index Homepage">
+        <span>🏠 Home</span>
+      </button>
+
+      <!-- Logo & Main Title -->
+      <div class="header-logo" onclick="showIndexView()">
+        <img src="/static/logo.svg" alt="FLINT Logo" class="header-logo-img" />
+        <div class="logo-text-wrap">
+          <h1 id="appHeaderTitle">FLINT - INDEX</h1>
+          <span class="logo-subtitle" id="appHeaderSubtitle">Edge Vision & Similarity Engine</span>
+        </div>
+      </div>
+
+      <!-- Index Mode Status Pills -->
+      <div class="status-pills" id="indexStatusPills">
+        <div class="pill model-pill" id="activeModelPill">
+          <span class="dot green"></span>
+          <span id="activeModelText">Loading Model...</span>
+        </div>
+        <div class="pill device-pill" id="devicePill">
+          <span class="icon">🖥️</span>
+          <span id="deviceText">Apple Silicon (MPS)</span>
+        </div>
+        <div class="pill db-pill" id="dbPill" onclick="openLoadDbModal()" style="cursor: pointer;" title="Click to browse & load SQLite databases">
+          <span class="icon">🗄️</span>
+          <span id="dbMediaCount">0 Media in SQLite</span>
+        </div>
+
+
+      </div>
+
+      <!-- Investigate Mode Case / Workspace Badge -->
+      <div class="investigate-header-pills hidden" id="investigateHeaderPills">
+        <span class="case-badge" id="investigateCaseBadge">📁 Default Investigation</span>
+        
+        <!-- Computation Mode Toggle (Investigate View) -->
+        <div class="computation-mode-pill" id="computationModeToggleInv">
+          <button type="button" class="comp-mode-btn active btn-comp-exact" onclick="setComputationMode('exact')" title="Brute Force: Exact exhaustive matrix multiplication across 100% of vectors (100% Precision)">
+            <span>⚡ Exact (Brute Force)</span>
+          </button>
+          <button type="button" class="comp-mode-btn btn-comp-ann" onclick="setComputationMode('ann')" title="ANN: Sub-linear approximate nearest neighbor search with clustered vector index (High-Speed Scalability)">
+            <span>🚀 ANN (Efficient)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Header Actions -->
+    <div class="header-right">
+      <!-- Investigate Mode Header Actions -->
+      <div class="investigate-actions-bar hidden" id="investigateActionsBar">
+        <button id="btnInvestigateRecompute" onclick="recomputeInvestigation()" class="btn btn-recompute-glow" title="Recompute all matches against active targets">⚡ Recompute Matches</button>
+        <button id="btnInvestigateSave" onclick="saveWorkspaceSession()" class="btn btn-secondary-outline" title="Save workspace state">💾 Save Workspace</button>
+        
+      </div>
+
+      <!-- Index Mode Actions -->
+      <div class="index-actions-bar" id="indexActionsBar">
+        <button class="btn btn-secondary-outline hidden" id="btnResumeInvestigation" onclick="showInvestigateView()" title="Resume Active Investigation">
+          🔍 Active Investigation →
+        </button>
+        <button class="btn btn-secondary" id="btnOpenLoadDbModal" onclick="openLoadDbModal()" title="Browse and load an existing SQLite database into Investigation">
+          📂 Load SQLite
+        </button>
+        <button class="btn btn-secondary" id="btnRefreshStatus" title="Refresh Database Status">🔄 Refresh</button>
+      </div>
+
+      <button class="btn btn-icon theme-toggle" id="btnToggleTheme" title="Toggle Dark/Light Mode">🌙</button>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- VIEW 1: FLINT - INDEX (HOMEPAGE / SETUP HUB)                             -->
+  <!-- ========================================================================= -->
+  <div id="view-index" class="app-view">
+    <!-- Main Content Area -->
+    <main class="app-main">
+
+      <!-- VISUAL MATCHER SETUP -->
+      <section class="visual-matcher-section">
+        <div class="visual-matcher-grid">
+          
+          <!-- STEP 1: KNOWN TARGET IMAGES -->
+          <div class="card panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <span class="step-num">1</span>
+                <h3>Target Reference Images (Known Set)</h3>
+              </div>
+              <div class="mode-toggles">
+                <button class="toggle-btn active" data-known-mode="path">Folder / File Path</button>
+                <button class="toggle-btn" data-known-mode="upload">Upload</button>
+              </div>
+            </div>
+            <div class="panel-body">
+              <!-- Path Mode -->
+              <div class="mode-content" id="knownPathSection">
+                <label for="knownPathInput">Known Directory or Image Path:</label>
+                <div class="input-row">
+                  <input type="text" id="knownPathInput" name="flint_known_path_input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-form-type="other" value="" placeholder="e.g. /path/to/reference_photos or single_image.jpg" />
+                  <input type="file" id="knownFolderPicker" webkitdirectory directory class="file-input-hidden" />
+                  <button class="btn btn-secondary" id="btnBrowseKnownFolder">Browse Folder</button>
+                  <button class="btn btn-secondary" id="btnLoadKnownPath">Load & Preview</button>
+                </div>
+                <p class="hint">Specify a folder with reference images, a single reference image, or a catalog JSON file.</p>
+              </div>
+
+              <!-- Upload Mode -->
+              <div class="mode-content hidden" id="knownUploadSection">
+                <div class="drop-zone" id="knownDropZone">
+                  <div class="drop-zone-icon">📤</div>
+                  <div class="drop-zone-text">Drag & drop known images here, or <span class="browse-link">browse</span></div>
+                  <input type="file" id="knownFileInput" multiple accept="image/*" class="file-input-hidden" />
+                </div>
+              </div>
+
+              <!-- Known Targets Preview Gallery -->
+              <div class="known-targets-preview" id="knownTargetsPreviewBox">
+                <div class="preview-header">
+                  <span>Loaded Reference Targets (<span id="knownTargetsCount">0</span>):</span>
+                  <button class="btn btn-text btn-xs" id="btnClearKnownTargets">Clear All</button>
+                </div>
+                <div class="targets-gallery" id="knownTargetsGallery">
+                  <div class="empty-gallery">No reference targets loaded. Enter a path above.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 2: UNKNOWN TARGET EVIDENCE -->
+          <div class="card panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <span class="step-num">2</span>
+                <h3>Unknown Set</h3>
+              </div>
+              <div class="mode-toggles">
+                <button class="toggle-btn active" data-unknown-mode="folder">Target Folder</button>
+                <button class="toggle-btn" data-unknown-mode="db">Full Database</button>
+              </div>
+            </div>
+            <div class="panel-body">
+              <!-- Folder Mode -->
+              <div class="mode-content" id="unknownFolderSection">
+                <label for="unknownFolderPath">Evidence Folder Path:</label>
+                <div class="input-row">
+                  <input type="text" id="unknownFolderPath" name="flint_unknown_folder_input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-form-type="other" value="" placeholder="e.g. /path/to/evidence_folder" />
+                  <input type="file" id="unknownFolderPicker" webkitdirectory directory class="file-input-hidden" />
+                  <button class="btn btn-secondary" id="btnBrowseUnknownFolder">Browse Folder</button>
+                </div>
+                
+                <div class="checkbox-row" style="margin-top: 10px;">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="unknownRecursive" checked />
+                    <span>Recursive Scan (Include Subfolders)</span>
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="unknownAutoIndex" checked />
+                    <span>Auto-Index New Media into SQLite</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Full Database Mode Selector -->
+              <div class="mode-content hidden" id="unknownDbSection">
+                <div class="db-manager-box">
+                  <div class="db-manager-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                      <label for="unknownDbSelect" class="font-bold">Active SQLite Database Archive:</label>
+                      <span class="hint">Loaded from managed folder <code>databases/</code></span>
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-xs" onclick="openNewDbModal()">➕ New Database</button>
+                  </div>
+                  
+                  <div class="input-row" style="margin-top: 8px;">
+                    <select id="unknownDbSelect" class="db-select-dropdown" onchange="onDatabaseSelectChange(this.value)">
+                      <!-- Dynamically populated from databases/ -->
+                    </select>
+                    <button type="button" class="btn btn-secondary-outline btn-sm" onclick="fetchDatabases(true)" title="Rescan databases folder">🔄 Rescan</button>
+                  </div>
+
+                  <div class="db-stat-strip" id="activeDbStatStrip" style="margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap;">
+                    <span class="pill pill-cyan pill-xs" id="dbActiveMediaCount">0 Media</span>
+                    <span class="pill pill-xs" id="dbActiveModelsIndexed">Models: None</span>
+                    <span class="pill pill-xs" id="dbActiveFileSize">0.0 MB</span>
+                  </div>
+
+                  <div style="margin-top: 14px;">
+                    <button type="button" class="btn btn-primary btn-sm" id="btnLoadDbToInvestigate" onclick="loadSelectedDatabaseToInvestigate()" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700;">
+                      <span>🚀</span> Load Archive into FLINT - Investigate Studio
+                    </button>
+                  </div>
+                  
+                  <p class="param-hint" style="margin-top: 8px;">
+                    💡 <b>Avoid Repeated Indexing:</b> Loading a previously indexed database skips feature extraction and searches existing vectors instantly.
+                  </p>
+                </div>
+              </div>
+
+              <!-- VIDEO PROCESSING OPTIONS BOX -->
+              <div class="video-options-box" style="margin-top: 16px;">
+                <div class="video-options-header">
+                  <label class="checkbox-label font-bold">
+                    <input type="checkbox" id="unknownProcessVideos" checked />
+                    <span>Process Video Files in Target Evidence</span>
+                  </label>
+                  <span class="pill pill-xs">Keyframe Extraction</span>
+                </div>
+                <div class="video-config-body" id="videoConfigBody">
+                  <div class="config-field">
+                    <label for="videoMethodSelect">Extraction Technology:</label>
+                    <select id="videoMethodSelect">
+                      <option value="ssim" selected>SSIM Scene-Change Detection (Intelligent Keyframes)</option>
+                      <option value="interval">Fixed Time Interval (Extract Every N Seconds)</option>
+                      <option value="uniform">Uniform Frame Count (Even Distribution)</option>
+                    </select>
+                  </div>
+
+                  <!-- SSIM Parameter -->
+                  <div id="videoParamSsim" class="video-method-param">
+                    <div class="input-row-slider">
+                      <label for="unknownVideoSsim">Scene Sensitivity Threshold: <b id="unknownVideoSsimVal">0.65</b></label>
+                      <input type="range" id="unknownVideoSsim" min="0.30" max="0.95" step="0.05" value="0.65" />
+                    </div>
+                  </div>
+
+                  <!-- Interval Parameter -->
+                  <div id="videoParamInterval" class="video-method-param hidden">
+                    <label for="unknownVideoInterval">Frame Interval (Seconds):</label>
+                    <div class="input-row">
+                      <input type="number" id="unknownVideoInterval" value="1.0" min="0.1" max="60.0" step="0.5" />
+                      <div class="interval-quick-pills">
+                        <button type="button" class="btn-pill-xs" onclick="document.getElementById('unknownVideoInterval').value='0.5'">0.5s</button>
+                        <button type="button" class="btn-pill-xs" onclick="document.getElementById('unknownVideoInterval').value='1.0'">1.0s</button>
+                        <button type="button" class="btn-pill-xs" onclick="document.getElementById('unknownVideoInterval').value='2.0'">2.0s</button>
+                        <button type="button" class="btn-pill-xs" onclick="document.getElementById('unknownVideoInterval').value='5.0'">5.0s</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Uniform Count Parameter -->
+                  <div id="videoParamUniform" class="video-method-param hidden">
+                    <label for="unknownVideoUniformCount">Total Frames to Extract per Video:</label>
+                    <input type="number" id="unknownVideoUniformCount" value="10" min="1" max="100" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+                <!-- STEP 3: MATCHING PARAMETERS & RUN -->
+        <div class="card panel run-panel" style="margin-top: 24px;">
+          <!-- Model Selection Click Boxes -->
+          <div class="model-selection-box-wrap">
+            <div class="model-selection-header">
+              <div>
+                <label class="font-bold">Active Vision Foundation Models (Multi-Select):</label>
+                <span class="hint">Check all models to compute embeddings for. In Investigate Studio, you can switch between models on-the-fly with 0ms latency.</span>
+              </div>
+              <div style="display: flex; gap: 6px;">
+                <button type="button" class="btn btn-secondary btn-xs" onclick="selectAllReadyModels()">☑️ Select All Ready</button>
+                <button type="button" class="btn btn-text btn-xs" onclick="clearSelectedModels()">☐ Reset</button>
+              </div>
+            </div>
+            <div class="matcher-model-grid" id="matcherModelGrid">
+              <!-- Dynamically populated model click boxes -->
+            </div>
+          </div>
+
+          <div class="run-params-grid">
+            <div class="param-group">
+              <label for="simThresholdSlider">Similarity Threshold: <b id="simThresholdVal">0% (Show All)</b></label>
+              <input type="range" id="simThresholdSlider" min="0" max="100" value="0" step="1" />
+              <span class="param-hint">0% shows all images; 80%+ filters to high-confidence matches.</span>
+            </div>
+
+            <div class="param-group">
+              <label for="metricSelect">Distance Metric Formula:</label>
+              <select id="metricSelect">
+                <option value="auto" selected>✨ Auto (Model-Optimal: L2-Normalized Cosine Similarity)</option>
+                <option value="cosine">Cosine Similarity (L2-Normalized Dot Product)</option>
+                <option value="dot">Un-normalized Dot Product</option>
+                <option value="euclidean">Euclidean Distance (L2)</option>
+              </select>
+              <span class="param-hint">Applies the author-recommended L2-normalized cosine similarity (dot product on unit hypersphere) for SigLIP 2, CLIP, and DINOv3.</span>
+            </div>
+
+            <div class="param-group">
+              <label for="aggregationSelect">Multi-Target Strategy:</label>
+              <select id="aggregationSelect">
+                <option value="max" selected>Max Similarity (Matches Any Target)</option>
+                <option value="mean">Average Similarity (Matches Set Profile)</option>
+                <option value="min">Min Similarity (Matches All Targets)</option>
+              </select>
+            </div>
+
+            <div class="param-group">
+              <label for="topKSelect">Limit Results (Top K):</label>
+              <select id="topKSelect">
+                <option value="0" selected>All Matches (No Limit)</option>
+                <option value="50">Top 50 Results</option>
+                <option value="100">Top 100 Results</option>
+                <option value="500">Top 500 Results</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="run-action-bar">
+            <button class="btn btn-primary btn-large btn-glow" id="btnRunVisualSearch">
+              ⚡ Run Visual Similarity Search & Open Investigation
+            </button>
+          </div>
+        </div>
+      </section>
+
+      </main>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- VIEW 2: FLINT - INVESTIGATE (STUDIO & ANALYSIS WORKSPACE)                 -->
+  <!-- ========================================================================= -->
+  <div id="view-investigate" class="app-view hidden">
+    <div class="investigate-layout">
+
+      <!-- LEFT SIDEBAR: EXPANDABLE SEARCH & FILTER MODULES -->
+      <aside class="investigate-sidebar">
+        
+        <!-- SECTION 1: FILENAME & HASH SEARCH (COLLAPSIBLE) -->
+        <div class="sidebar-accordion-card glass" id="cardFilenameSearch">
+          <div class="sidebar-accordion-header" onclick="toggleSidebarSection(this)">
+            <div class="accordion-header-title">
+              <span class="icon">🔍</span>
+              <span>Filter Filename / Hash</span>
+            </div>
+            <span class="accordion-chevron-icon">▶</span>
+          </div>
+          <div class="sidebar-accordion-body hidden">
+            <div class="control-group">
+              <input type="text" id="invSearchInput" placeholder="🔍 Search filename, MD5, SHA256..." oninput="applyInvestigateFilters()" />
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: SEARCH EMBEDDINGS STRING (COLLAPSIBLE) -->
+        <div class="sidebar-accordion-card glass" id="cardSemanticSearch">
+          <div class="sidebar-accordion-header" onclick="toggleSidebarSection(this)">
+            <div class="accordion-header-title">
+              <span class="icon" style="color: var(--accent-cyan);">✨</span>
+              <span style="color: var(--accent-cyan);">Search Embeddings String</span>
+            </div>
+            <span class="accordion-chevron-icon">▶</span>
+          </div>
+          <div class="sidebar-accordion-body hidden">
+            <div class="semantic-search-box" style="margin-top: 0; padding: 4px; border: none; background: transparent;">
+              <input type="text" id="invSemanticInput" placeholder="Enter text query or paste vector string..." onkeydown="if(event.key==='Enter')runInvestigateSemanticSearch()" />
+              
+              <!-- Option Buttons for all compatible embeddings in current SQLite -->
+              <div class="control-group" style="margin-top: 6px; margin-bottom: 2px;">
+                <label style="font-size: 10.5px; color: var(--text-muted); margin-bottom: 4px; display: block;">Embedding Model:</label>
+                <div class="semantic-model-options-pills" id="invSemanticModelOptions">
+                  <button type="button" class="sem-option-btn active" onclick="selectSemanticEmbeddingModel('all')">
+                    <span>✨ All Compatible</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="control-group" style="margin-top: 6px;">
+                <label for="invSemanticTopKSelect" style="font-size: 10.5px; color: var(--text-muted); margin-bottom: 2px; display: block;">Result Limit:</label>
+                <select id="invSemanticTopKSelect" class="input-xs" style="width: 100%; padding: 4px 8px; font-size: 12px; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px;" onchange="if(document.getElementById('invSemanticInput')?.value.trim())runInvestigateSemanticSearch()">
+                  <option value="0" selected>All Results</option>
+                  <option value="25">Top 25 Matches</option>
+                  <option value="50">Top 50 Matches</option>
+                  <option value="100">Top 100 Matches</option>
+                </select>
+              </div>
+
+              <div class="semantic-btns" style="margin-top: 8px; display: flex; gap: 6px;">
+                <button class="btn btn-primary btn-xs" onclick="runInvestigateSemanticSearch()" style="flex: 1; font-weight: 700;">✨ Search Embeddings</button>
+                <button class="btn btn-secondary-outline btn-xs" onclick="resetInvestigateSemanticSearch()">Clear</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 3: MATCH FILTERS & MEDIA TYPE (COLLAPSIBLE) -->
+        <div class="sidebar-accordion-card glass" id="cardFilterOptions">
+          <div class="sidebar-accordion-header" onclick="toggleSidebarSection(this)">
+            <div class="accordion-header-title">
+              <span class="icon">🎛️</span>
+              <span>Match Status & Filters</span>
+            </div>
+            <span class="accordion-chevron-icon">▶</span>
+          </div>
+          <div class="sidebar-accordion-body hidden">
+            <!-- Match Status Filter -->
+            <div class="control-group">
+              <label for="invMatchStatusSelect" style="font-size: 11px; margin-bottom: 3px;">Match Status</label>
+              <select id="invMatchStatusSelect" onchange="applyInvestigateFilters()">
+                <option value="all" selected>All Scanned Items</option>
+                <option value="matched">Matches Found</option>
+                <option value="unmatched">Unmatched Only</option>
+              </select>
+            </div>
+
+            <!-- Media Type Radios -->
+            <div class="control-group" style="margin-top: 8px;">
+              <label style="font-size: 11px; margin-bottom: 3px;">Media Type</label>
+              <div class="media-type-pill-group">
+                <label><input type="radio" name="inv_media_type" value="all" checked onchange="applyInvestigateFilters()"> All</label>
+                <label><input type="radio" name="inv_media_type" value="images" onchange="applyInvestigateFilters()"> 🖼️ Images</label>
+                <label><input type="radio" name="inv_media_type" value="videos" onchange="applyInvestigateFilters()"> 🎥 Videos</label>
+              </div>
+            </div>
+
+            <!-- Stats Summary Bar -->
+            <div class="inv-stats-bar" style="margin-top: 8px;">
+              <span>Total: <strong id="invStatTotal">0</strong></span>
+              <span>Matched: <strong id="invStatMatched" style="color: #4ade80;">0</strong></span>
+              <span>Unmatched: <strong id="invStatUnmatched" style="color: var(--text-muted);">0</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 4: REFERENCE TARGETS TREE VIEW (EXPANDED BY DEFAULT) -->
+        <div class="sidebar-accordion-card glass" id="cardRefTargets">
+          <div class="sidebar-accordion-header" onclick="toggleSidebarSection(this)">
+            <div class="accordion-header-title">
+              <span class="icon">🎯</span>
+              <span>Reference Targets</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <button type="button" onclick="event.stopPropagation(); openAddReferenceTargetModal();" class="btn btn-primary btn-xs" style="padding: 1px 6px; font-size: 10px; font-weight: 700;" title="Upload new image to reference target list">➕ Add</button>
+              <button type="button" onclick="event.stopPropagation(); recomputeInvestigation();" class="btn btn-secondary-outline btn-xs" style="color: var(--accent-primary); border-color: var(--accent-primary); padding: 1px 6px; font-size: 10px;" title="Recompute similarity across active targets">⚡ Recompute</button>
+              <span class="accordion-chevron-icon">▼</span>
+            </div>
+          </div>
+
+          <div class="sidebar-accordion-body">
+            <!-- Tree Action Buttons -->
+            <div class="tree-controls-row">
+              <button class="btn btn-secondary-outline btn-xs" onclick="expandAllTree()">▼ Expand</button>
+              <button class="btn btn-secondary-outline btn-xs" onclick="collapseAllTree()">▶ Collapse</button>
+              <button class="btn btn-secondary-outline btn-xs" onclick="selectAllTree()">☑️ All</button>
+              <button class="btn btn-secondary-outline btn-xs" onclick="unselectAllTree()">☐ None</button>
+            </div>
+
+            <div class="tree-summary-text" id="invTreeSummaryText">Selected 0 of 0 reference targets</div>
+
+            <!-- Target Items Tree Container -->
+            <div class="tree-list-container" id="invTargetsTreeContainer">
+              <div class="empty-gallery" style="padding: 12px; font-size: 11px;">Loading reference targets...</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- RIGHT MAIN STAGE: RESULTS & GALLERY -->
+      <section class="investigate-main glass">
+        <!-- Results Stage Header -->
+        <div class="results-stage-header">
+          <div class="results-title-box">
+            <h3 id="invStudioTitle">Unknown Evidence Studio</h3>
+            <span class="badge" id="invStudioBadge" style="background: rgba(0, 242, 254, 0.15); color: var(--accent-primary);">VID Mode</span>
+          </div>
+
+          <div class="results-actions-right">
+            <button class="btn btn-secondary-outline hidden" id="btnUnHideAll" onclick="unhideAllInvestigateFiles()">👁️ Unhide All</button>
+
+            <!-- Filter Results Dropdown -->
+            <div class="filter-menu-wrapper">
+              <button class="btn btn-secondary-outline" id="btnToggleTopFilterMenu" onclick="toggleTopFilterMenu()">
+                <span>🎛️</span> Filter Results <span>▼</span>
+              </button>
+              <div class="filter-dropdown-menu glass hidden" id="topFilterDropdownMenu">
+                <h5>Results Filtering & Sorting</h5>
+                <div class="control-group">
+                  <label>Sort Results By:</label>
+                  <select id="invSortSelect" onchange="applyInvestigateFilters()">
+                    <option value="score_desc" selected>Best Match Score (Highest First)</option>
+                    <option value="score_asc">Lowest Match Score First</option>
+                    <option value="name_asc">Filename (A-Z)</option>
+                    <option value="name_desc">Filename (Z-A)</option>
+                  </select>
+                </div>
+                <div class="control-group">
+                  <div class="label-with-value">
+                    <label>Min Match Score:</label>
+                    <span id="invMinScoreVal" style="color: var(--accent-primary); font-weight: 700;">0%</span>
+                  </div>
+                  <input type="range" id="invMinScoreSlider" min="0" max="100" value="0" step="1" oninput="onInvestigateMinScoreChange(this.value)" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Export Buttons -->
+            <button class="btn btn-secondary-outline" onclick="exportResults('html')">📄 HTML Report</button>
+            <button class="btn btn-secondary-outline" onclick="exportResults('csv')">📊 CSV</button>
+            
+          </div>
+        </div>
+
+        <!-- Active Crop Search Filter Banner -->
+        <div class="crop-filter-banner glass hidden" id="invCropFilterBanner" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; margin-bottom: 16px; border-radius: 10px; background: rgba(15, 23, 42, 0.85); border: 1px solid var(--accent-primary);">
+          <div class="crop-filter-left" style="display: flex; align-items: center; gap: 14px;">
+            <div class="crop-filter-preview-box" style="width: 52px; height: 52px; border-radius: 6px; overflow: hidden; border: 1px solid var(--accent-primary); background: #000; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              <img id="invCropFilterImg" src="" alt="Cropped Region" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+            </div>
+            <div class="crop-filter-text">
+              <div class="crop-filter-title" style="font-weight: 700; font-size: 13px; color: var(--accent-cyan); display: flex; align-items: center; gap: 6px;">
+                <span>🎯</span> Targeted Multi-Model Crop Search
+              </div>
+              <div class="crop-filter-source" id="invCropFilterSource" style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); margin-top: 2px;">Source: image.jpg</div>
+            </div>
+          </div>
+          <div class="crop-filter-right" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <!-- Copy Embeddings Dropdown Menu -->
+            <div class="dropdown-wrapper" style="position: relative;">
+              <button class="btn btn-secondary-outline btn-xs" id="btnCopyCropEmbeddingsMenu" onclick="toggleCropEmbeddingsMenu()" style="display: flex; align-items: center; gap: 6px;">
+                <span>📋</span> Copy Embeddings String <span>▼</span>
+              </button>
+              <div class="crop-embeddings-menu glass hidden" id="cropEmbeddingsDropdownMenu" style="position: absolute; right: 0; top: 32px; z-index: 1000; min-width: 260px; background: #0c1322; border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.8);">
+                <div style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; padding: 4px 8px;">Model Crop Embeddings:</div>
+                <div id="cropEmbeddingsMenuItems" style="display: flex; flex-direction: column; gap: 4px;">
+                  <!-- Injected buttons for each model embedding -->
+                </div>
+                <div style="border-top: 1px solid rgba(255,255,255,0.08); margin: 6px 0; padding-top: 4px;">
+                  <button class="btn btn-primary btn-xs" style="width: 100%; justify-content: center;" onclick="copyAllCropEmbeddingsJSON()">
+                    📦 Copy All Models (JSON)
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <button class="btn btn-danger-outline btn-xs" onclick="clearInvestigateCropFilter()" title="Close Crop Search and restore full investigation">
+              ✕ Close Crop Search
+            </button>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state hidden" id="invEmptyState">
+          <span class="empty-icon">🖼️</span>
+          <h3>No Media Matches Found</h3>
+          <p>Adjust your filter parameters, lower the threshold slider, or click <strong>🏠 Home</strong> to run a new search.</p>
+        </div>
+
+        <!-- Semantic Search Multi-Model Tabs -->
+        <div class="semantic-model-tab-bar hidden" id="invSemanticModelTabs" style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; background: rgba(15, 23, 42, 0.6); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+          <span style="font-size: 11px; font-weight: 700; color: var(--accent-cyan); text-transform: uppercase;">⚡ Multi-Model Top 25:</span>
+          <div id="invSemanticModelTabsList" style="display: flex; gap: 6px; flex-wrap: wrap;"></div>
+        </div>
+
+        <!-- Default Gallery Computed Models Tabs Strip -->
+        <div class="gallery-model-tab-bar" id="galleryModelTabsBar">
+          <div style="display: flex; align-items: center; gap: 6px; margin-right: 6px;">
+            <span style="font-size: 14px;">⚡</span>
+            <span style="font-size: 11px; font-weight: 800; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 0.5px;">Computed Model Matches:</span>
+          </div>
+          <div id="galleryModelTabsList" style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <!-- Dynamically populated model tabs for each computed model -->
+          </div>
+        </div>
+
+        <!-- Model Patch / Sector Scoring & Threshold Control Bar (Available for All Models) -->
+        <div class="dinov3-patch-controls-bar" id="dinov3PatchControlsBar">
+          <div class="patch-controls-left">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="font-size: 14px;">🎯</span>
+              <span id="modelPatchBarTitle" style="font-size: 11px; font-weight: 800; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 0.5px;">CLIP ViT-B/32 Patch Scoring:</span>
+            </div>
+            
+            <!-- Scoring Mode Toggle Buttons with Educational Tooltip Explanations -->
+            <div class="patch-mode-toggle-group">
+              <div class="tooltip-trigger-wrap">
+                <button type="button" class="btn-patch-mode active" id="btnPatchModeMax" onclick="setDinov3PatchMode('max')">
+                  <span>🏆 Max Patch Score (Peak)</span>
+                </button>
+                <div class="mode-tooltip-card">
+                  <div class="tooltip-title"><span>🏆</span> Max Patch Score (Peak Localized Match)</div>
+                  <div class="tooltip-desc">
+                    Evaluates each photograph based on its <b>single highest-matching spatial patch token</b> (or highest individual reference target match).
+                  </div>
+                  <div class="tooltip-when">
+                    <b>💡 When to use:</b> Best for detecting <b>small sub-objects, cropped details, logos, wristwatches, weapons, or faces</b> occupying only a fraction of the frame, ignoring background clutter.
+                  </div>
+                </div>
+              </div>
+
+              <div class="tooltip-trigger-wrap">
+                <button type="button" class="btn-patch-mode" id="btnPatchModeAvg" onclick="setDinov3PatchMode('avg')">
+                  <span>📊 Average Patch Score (Mean)</span>
+                </button>
+                <div class="mode-tooltip-card">
+                  <div class="tooltip-title"><span>📊</span> Average Patch Score (Mean Chamfer Alignment)</div>
+                  <div class="tooltip-desc">
+                    Evaluates each photograph based on the <b>overall mean alignment across all spatial patch tokens</b> (or average similarity across all reference targets).
+                  </div>
+                  <div class="tooltip-when">
+                    <b>💡 When to use:</b> Best for evaluating <b>full scene similarity, room layout, background environment, perspective, and general composition</b> while suppressing isolated texture noise.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Patch Score Threshold Slider -->
+          <div class="patch-controls-right" style="display: flex; align-items: center; gap: 12px;">
+            <div class="patch-slider-wrap" style="display: flex; align-items: center; gap: 8px;">
+              <label for="dinov3PatchSlider" id="dinov3PatchSliderLabel" style="font-size: 11px; font-weight: 700; color: var(--text-main); white-space: nowrap;">
+                🏆 Min Max Score: <span id="dinov3PatchSliderVal" style="color: var(--accent-cyan); font-family: var(--font-mono);">0%</span>
+              </label>
+              <input type="range" id="dinov3PatchSlider" min="0" max="100" value="0" step="1" oninput="onDinov3PatchSliderInput(this.value)" style="width: 140px; cursor: pointer;" />
+            </div>
+
+            <span class="pill pill-xs pill-cyan" id="dinov3PatchCountBadge" style="font-size: 10px; font-weight: 700;">
+              0 Matches (≥ 0%)
+            </span>
+          </div>
+        </div>
+
+        <!-- Results Evidence Media Grid -->
+        <div class="investigate-results-grid" id="investigateResultsGrid">
+          <!-- Evidence media cards populated here -->
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODALS                                                                    -->
+  <!-- ========================================================================= -->
+
+  <!-- MODAL: EVIDENCE MEDIA DETAIL & ANALYSIS LIGHTBOX -->
+  <div class="modal-overlay hidden" id="investigateDetailModal" onclick="if(event.target===this)closeInvestigateDetailModal()">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="icon">🔍</span>
+          <h3>Media Analysis & Crop Tool: <span id="detailFilename" style="color: var(--accent-primary);">image.jpg</span></h3>
+        </div>
+        <button class="modal-close" onclick="closeInvestigateDetailModal()">&times;</button>
+      </div>
+      <div class="modal-body detail-modal-body">
+        <div class="detail-grid-2col">
+          <!-- Left: Evidence Image with Drag Crop Box -->
+          <div class="detail-img-box glass">
+            <div class="detail-box-head">EVIDENCE MEDIA (UNKNOWN)</div>
+            <div class="detail-canvas-wrap" id="detailCanvasWrap">
+              <img id="detailImg" alt="Evidence" />
+              <div class="crop-selection-box hidden" id="detailCropBox"></div>
+            </div>
+            <div class="detail-crop-actions" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+              <span class="hint">Drag a box on the image to crop and search for specific objects.</span>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <label class="toggle-switch-wrap" style="display: flex; align-items: center; gap: 6px; font-size: 11px; cursor: pointer; color: var(--text-main); user-select: none;" title="Automatically isolate the foreground object and remove background clutter">
+                  <input type="checkbox" id="cropRemoveBgToggle" style="cursor: pointer;" />
+                  <span>🪄 Remove Background</span>
+                </label>
+                <button class="btn btn-primary btn-xs" id="btnRunDetailCropSearch" onclick="runDetailCropSearch()">⚡ Search Selected Crop</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Matched Reference Targets & Metadata -->
+          <div class="detail-meta-box glass">
+            <div class="detail-box-head">MATCHED REFERENCE TARGETS & EXIF</div>
+            <div class="detail-meta-scroll" id="detailTargetsList">
+              <!-- Matched targets breakdown -->
+            </div>
+            <div class="detail-exif-card">
+              <div class="meta-line"><b>File Path:</b> <span id="detailPath" class="break-word">-</span></div>
+              <div class="meta-line"><b>Dimensions:</b> <span id="detailDims">-</span></div>
+              <div class="meta-line"><b>MD5 Hash:</b> <span id="detailMd5">-</span></div>
+              <div class="meta-line"><b>EXIF Data:</b> <span id="detailExif">-</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+        <button class="btn btn-secondary-outline" style="color: var(--accent-cyan); border-color: var(--accent-cyan);" onclick="if(appState.activeDetailItem) triggerReverseEngineer(encodeURIComponent(appState.activeDetailItem.file_path), appState.activeDetailItem.id || appState.activeDetailItem.media_id || null)">
+          <span>🧠</span> Reverse Engineer from Embeddings
+        </button>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-secondary" id="btnDetailCopyPath">📋 Copy File Path</button>
+          <button class="btn btn-primary" onclick="closeInvestigateDetailModal()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: VIDEO PLAYER & KEYFRAME MATCH REVIEW -->
+  <div class="modal-overlay hidden" id="videoReviewModal" onclick="if(event.target===this)closeVideoReviewModal()">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-header">
+        <div class="modal-title">
+          <h3>🎬 Video Match Review: <span id="modalVideoFilename" style="color: var(--accent-primary);">video.mp4</span></h3>
+          <span class="modal-score-pill" id="modalVideoScoreBadge">89.07% Max Match</span>
+        </div>
+        <button class="modal-close" id="btnCloseVideoReviewModal" onclick="closeVideoReviewModal()" title="Close video review">&times;</button>
+      </div>
+
+      <div class="modal-body video-review-modal-body">
+        <!-- Top: Video Player & Jump Timeline -->
+        <div class="video-player-container">
+          <div class="video-wrapper" id="modalVideoCropWrap" style="position: relative; user-select: none;">
+            <video id="modalVideoPlayer" crossorigin="anonymous" controls playsinline preload="metadata">
+              Your browser does not support HTML5 video.
+            </video>
+            <canvas id="modalVideoCropCanvas" class="hidden" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; z-index: 25; cursor: crosshair;"></canvas>
+            <div class="crop-selection-box hidden" id="modalVideoCropBox" style="position: absolute; border: 2px dashed #00f2fe; background: rgba(0, 242, 254, 0.25); z-index: 30; pointer-events: none;"></div>
+          </div>
+          <div class="video-info-sidebar">
+            <div class="video-details-card">
+              <h4>Video Information</h4>
+              <div class="video-meta-line"><b>File:</b> <span id="modalVideoPath" class="break-word">/path/to/video.mp4</span></div>
+              <div class="video-meta-line"><b>Best Target Match:</b> <span id="modalVideoTarget" class="badge-target-name">Target</span></div>
+              <div class="video-meta-line"><b>Total Keyframes:</b> <span id="modalVideoTotalKf">0</span></div>
+            </div>
+
+            <!-- Video Frame Crop Search Action Box -->
+            <div class="video-crop-action-card" style="margin-top: 12px; padding: 12px; border-radius: 8px; background: rgba(0, 242, 254, 0.06); border: 1px solid rgba(0, 242, 254, 0.3);">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                <h4 style="margin: 0; font-size: 12px; color: var(--accent-cyan); display: flex; align-items: center; gap: 6px;">
+                  <span>✂️</span> Frame Crop Search
+                </h4>
+                <span id="videoCropIndicator" class="pill pill-xs hidden" style="background: var(--accent-primary); color: #000; font-weight: 700;">Cropping Active</span>
+              </div>
+              <p class="hint" style="margin: 0 0 8px 0; font-size: 11px; line-height: 1.4;">
+                Freeze video on any frame and drag a box over an object, person, or pattern to search across all models.
+              </p>
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <button class="btn btn-secondary-outline btn-xs" id="btnToggleVideoCrop" onclick="toggleVideoCropMode()">
+                  <span>❄️</span> Freeze Frame & Crop
+                </button>
+                <label class="toggle-switch-wrap hidden" id="videoCropRemoveBgWrap" style="display: flex; align-items: center; gap: 6px; font-size: 11px; cursor: pointer; color: var(--text-main); user-select: none;" title="Automatically isolate the foreground object and remove background clutter">
+                  <input type="checkbox" id="videoCropRemoveBgToggle" style="cursor: pointer;" />
+                  <span>🪄 Remove Background</span>
+                </label>
+                <button class="btn btn-primary btn-xs hidden" id="btnExecuteVideoCrop" onclick="executeVideoCropSearch()">
+                  ⚡ Search Cropped Frame
+                </button>
+                <button class="btn btn-secondary-outline btn-xs hidden" id="btnCancelVideoCrop" onclick="cancelVideoCropMode()">
+                  Cancel
+                </button>
+              </div>
+            </div>
+
+            <div class="video-timeline-shortcuts">
+              <h4>⏱️ Quick Jump to Matched Moments:</h4>
+              <div class="timeline-pills-wrap" id="modalTimelinePills"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Middle: Keyframe Score Filter Slider -->
+        <div class="video-frames-header-bar">
+          <div class="frames-header-left">
+            <h4 style="margin: 0; font-size: 15px; color: #f1f5f9; display: flex; align-items: center; gap: 8px;">
+              <span>🎯</span> Matched Known Images (<span id="modalVisibleFramesCount" style="color: var(--accent-cyan); font-weight: 700;">0</span> of <span id="modalTotalFramesCount">0</span> matched &ge; <span id="modalThresholdLabel" style="color: var(--accent-cyan);">40%</span>)
+            </h4>
+          </div>
+          <div class="frames-header-right">
+            <div class="slider-controls-wrap" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <label for="modalFrameScoreSlider" style="font-size: 13px; font-weight: 600; color: var(--text-main);">
+                Filter by Match Score: <b id="modalFrameScoreVal" style="color: var(--accent-cyan); min-width: 44px; display: inline-block;">40%</b>
+              </label>
+              <input type="range" id="modalFrameScoreSlider" min="0" max="100" value="40" step="1" style="cursor: pointer; width: 140px;" />
+              <div class="slider-presets" style="display: flex; gap: 4px;">
+                <button type="button" class="btn-preset-chip" data-val="0" onclick="setVideoSliderValue(0)">All (0%)</button>
+                <button type="button" class="btn-preset-chip" data-val="30" onclick="setVideoSliderValue(30)">30%</button>
+                <button type="button" class="btn-preset-chip active" data-val="40" onclick="setVideoSliderValue(40)">40%</button>
+                <button type="button" class="btn-preset-chip" data-val="50" onclick="setVideoSliderValue(50)">50%</button>
+                <button type="button" class="btn-preset-chip" data-val="70" onclick="setVideoSliderValue(70)">70%</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom: Extracted Keyframes Grid -->
+        <div class="video-keyframes-review-grid" id="modalVideoKeyframesGrid"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="modalVideoCopyPathBtn">📋 Copy Video Path</button>
+        <button class="btn btn-primary" id="modalVideoCloseBtn" onclick="closeVideoReviewModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: COMPARE TARGET VS MATCH -->
+  <div class="modal-overlay hidden" id="compareModal" onclick="if(event.target===this)document.getElementById('compareModal').classList.add('hidden')">
+    <div class="modal-dialog modal-large">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="icon">🔍</span>
+          <h3>Side-by-Side Comparison</h3>
+          <span class="modal-score-pill" id="modalScoreBadge">95.4% Similarity</span>
+        </div>
+        <button class="modal-close" onclick="document.getElementById('compareModal').classList.add('hidden')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="compare-grid">
+          <div class="compare-col">
+            <div class="compare-label">Known Target Reference:</div>
+            <div class="compare-img-box">
+              <img id="modalTargetImg" alt="Target Reference" />
+            </div>
+            <div class="compare-meta" id="modalTargetLabel">target.jpg</div>
+            <div class="compare-path" id="modalTargetMeta">/path/to/target</div>
+          </div>
+          <div class="compare-divider">
+            <span class="vs-badge">VS</span>
+            <div class="metric-pill" id="modalMetricPill">Cosine: 0.9540</div>
+          </div>
+          <div class="compare-col">
+            <div class="compare-label">Matched Unknown Evidence:</div>
+            <div class="compare-img-box">
+              <img id="modalMatchImg" alt="Matched Evidence" />
+            </div>
+            <div class="compare-meta" id="modalMatchLabel">unknown.jpg</div>
+            <div class="compare-path" id="modalMatchMeta">/path/to/unknown</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="modalCopyPathBtn">📋 Copy File Path</button>
+        <button class="btn btn-primary" onclick="document.getElementById('compareModal').classList.add('hidden')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  
+  <!-- MODAL: BROWSE & LOAD SQLITE INVESTIGATION ARCHIVE -->
+  <div class="modal-overlay hidden" id="loadDbModal" onclick="if(event.target===this)closeLoadDbModal()">
+    <div class="modal-dialog modal-large">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="icon">📂</span>
+          <h3>Load SQLite Investigation Archive</h3>
+        </div>
+        <button class="modal-close" onclick="closeLoadDbModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="hint">Select any previously indexed SQLite database from the managed <code>databases/</code> folder to open in <strong>FLINT - Investigate Studio</strong> instantly without re-indexing.</p>
+
+        <div class="db-archive-list-container" id="loadDbModalList" style="margin-top: 16px; display: flex; flex-direction: column; gap: 12px; max-height: 420px; overflow-y: auto;">
+          <!-- Populated dynamically with database cards -->
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: space-between;">
+        <button class="btn btn-secondary-outline" onclick="closeLoadDbModal(); openNewDbModal();">➕ Create New Database</button>
+        <button class="btn btn-secondary" onclick="closeLoadDbModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NAME SQLITE ARCHIVE BEFORE MATCHING -->
+  <div class="modal-overlay hidden" id="saveDbPromptModal" onclick="if(event.target===this)closeSaveDbPromptModal()">
+    <div class="modal-dialog modal-md">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="icon">💾</span>
+          <h3>Name SQLite Archive for Future Reviews</h3>
+        </div>
+        <button class="modal-close" onclick="closeSaveDbPromptModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="hint">FLINT will index this evidence set and store multi-model embeddings in an SQLite database inside the managed <code>databases/</code> folder.</p>
+        
+        <div class="input-group" style="margin-top: 12px;">
+          <label for="saveDbPromptNameInput">Investigation Database Name:</label>
+          <input type="text" id="saveDbPromptNameInput" placeholder="e.g. case_2026_01 or evidence_batch_a" />
+          <span class="param-hint">Will be saved as <code>databases/&lt;name&gt;.sqlite</code> so you can re-open it anytime in FLINT - Investigate without re-indexing.</span>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: space-between;">
+        <button class="btn btn-secondary-outline" onclick="executeVisualSearch(null)">⚡ Run in Default DB</button>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-secondary" onclick="closeSaveDbPromptModal()">Cancel</button>
+          <button class="btn btn-primary" onclick="confirmSaveDbAndRun()">💾 Save to Archive & Run</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CREATE NEW SQLITE DATABASE -->
+  <div class="modal-overlay hidden" id="newDbModal" onclick="if(event.target===this)closeNewDbModal()">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="icon">🗄️</span>
+          <h3>Create New SQLite Database</h3>
+        </div>
+        <button class="modal-close" onclick="closeNewDbModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="hint">Creates an isolated database file inside <code>databases/</code> for a new case or evidence archive.</p>
+        <div class="input-group" style="margin-top: 12px;">
+          <label for="newDbNameInput">Database Name:</label>
+          <input type="text" id="newDbNameInput" placeholder="e.g. case_2026_01 or evidence_vault" />
+          <span class="param-hint">Will be saved as <code>databases/&lt;name&gt;.sqlite</code></span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeNewDbModal()">Cancel</button>
+        <button class="btn btn-primary" id="btnSubmitCreateDb" onclick="submitCreateNewDatabase()">➕ Create & Activate</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: HUGGING FACE TOKEN & GATED MODELS -->
+  <div class="modal-overlay hidden" id="hfTokenModal" onclick="if(event.target===this)closeHfTokenModal()">
+    <div class="modal-dialog modal-md">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="icon">🔑</span>
+          <h3>Hugging Face Token & Gated Models</h3>
+        </div>
+        <button class="modal-close" id="btnCloseHfTokenModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="hf-token-instructions">
+          <p>Meta DINOv3 is a gated foundation model. To download weights, follow these 3 steps:</p>
+          <ol>
+            <li>
+              <b>Accept Model Terms:</b>
+              <a href="https://huggingface.co/facebook/dinov3-vitb16-pretrain-lvd1689m" target="_blank" class="hf-link">
+                Meta DINOv3 HuggingFace Page ↗
+              </a>
+            </li>
+            <li>
+              <b>Create a Free Read Token:</b>
+              <a href="https://huggingface.co/settings/tokens" target="_blank" class="hf-link">
+                Hugging Face Token Settings ↗
+              </a>
+            </li>
+            <li>
+              <b>Paste Token Below:</b>
+            </li>
+          </ol>
+        </div>
+
+        <div class="input-group" style="margin-top: 14px;">
+          <label for="hfTokenModalInput">Hugging Face User Access Token:</label>
+          <div class="hf-input-wrapper">
+            <input type="password" id="hfTokenModalInput" placeholder="hf_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" class="hf-token-input" />
+            <button type="button" class="btn btn-secondary-outline btn-xs" id="btnToggleTokenVisibility" title="Toggle visibility">👁️</button>
+          </div>
+          <span class="hf-token-status" id="hfTokenSavedStatus">Token will be stored securely in your browser localStorage.</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btnCancelHfTokenModal">Cancel</button>
+        <button class="btn btn-primary" id="btnSaveHfTokenAndDownload">💾 Save Token & Download</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Live Execution Console Drawer -->
+  <footer class="console-footer">
+    <div class="console-bar">
+      <div class="console-bar-left">
+        <span class="console-dot"></span>
+        <span class="console-title">LIVE ENGINE LOG:</span>
+        <span class="console-snippet" id="consoleBarSnippet">Ready</span>
+        <span class="console-error-badge hidden" id="consoleErrorBadge">0 Errors</span>
+      </div>
+      <div class="console-bar-right">
+        <button class="btn btn-text btn-xs" id="btnQuickCopyLog">📋 Copy Logs</button>
+        <button class="btn btn-text btn-xs" id="btnToggleConsole">▲ Expand Console</button>
+      </div>
+    </div>
+    <div class="console-drawer hidden" id="consoleDrawer">
+      <div class="console-drawer-header">
+        <div class="console-filters">
+          <button class="log-filter-btn active" data-level="ALL">ALL (<span id="countLogAll">0</span>)</button>
+          <button class="log-filter-btn log-lvl-error" data-level="ERROR">ERRORS (<span id="countLogError">0</span>)</button>
+          <button class="log-filter-btn log-lvl-warn" data-level="WARN">WARNINGS (<span id="countLogWarn">0</span>)</button>
+          <button class="log-filter-btn log-lvl-success" data-level="SUCCESS">SUCCESS (<span id="countLogSuccess">0</span>)</button>
+          <button class="log-filter-btn log-lvl-info" data-level="INFO">INFO (<span id="countLogInfo">0</span>)</button>
+        </div>
+        <div class="console-actions">
+          <label class="auto-scroll-label">
+            <input type="checkbox" id="autoScrollLog" checked /> Auto-scroll
+          </label>
+          <button class="btn btn-secondary btn-xs" id="btnCopyFormattedLogs">📋 Copy Formatted</button>
+          <button class="btn btn-text btn-xs" id="btnClearLogConsole">🗑️ Clear</button>
+        </div>
+      </div>
+      <div class="console-logs" id="consoleLogsContainer">
+        <!-- Log entries populated here -->
+      </div>
+    </div>
+  </footer>
+
+  <!-- MODAL: CROP EMBEDDINGS VIEWER -->
+  <div class="modal-overlay hidden" id="cropEmbeddingsModal" onclick="if(event.target===this)closeCropEmbeddingsModal()">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <h3>📋 Crop Embeddings Vector Inspector</h3>
+        <button class="modal-close-btn" onclick="closeCropEmbeddingsModal()">✕</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 16px;">
+        <p style="font-size: 12px; color: var(--text-muted);">
+          Extracted normalized unit hypersphere embeddings for the selected image crop across all active foundation models in this SQLite database:
+        </p>
+        <div id="cropEmbeddingsModalContent" style="display: flex; flex-direction: column; gap: 12px;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeCropEmbeddingsModal()">Close</button>
+        <button class="btn btn-primary" onclick="copyAllCropEmbeddingsJSON()">📋 Copy All (JSON)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- MODAL: ADD REFERENCE TARGET (IMAGES & VIDEOS) WITH FOLDER MANAGEMENT -->
+  <div class="modal-overlay hidden" id="addRefTargetModal" onclick="if(event.target===this)closeAddReferenceTargetModal()">
+    <div class="modal-dialog modal-md glass" style="max-width: 520px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 20px;">🎯</span>
+          <h3>Add Reference Target (Image or Video)</h3>
+        </div>
+        <button class="modal-close-btn" onclick="closeAddReferenceTargetModal()">✕</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px;">
+        <p style="font-size: 12px; color: var(--text-muted); margin: 0;">
+          Upload a target image or video to add to your reference dataset. FLINT will automatically extract keyframes and compute multi-model embeddings to match unknown evidence against all scenes in real time.
+        </p>
+
+        <!-- Drop Zone -->
+        <div class="drop-zone" id="refTargetDropZone" onclick="document.getElementById('refTargetFileInput').click()" style="padding: 18px; border: 2px dashed rgba(0,242,254,0.3); border-radius: 8px; text-align: center; cursor: pointer; background: rgba(0,0,0,0.25); transition: border-color 0.2s;">
+          <input type="file" id="refTargetFileInput" accept="image/*,video/*,.mp4,.mov,.avi,.mkv,.webm,.m4v" class="hidden" onchange="handleRefTargetFileInput(this)" />
+          <div id="refTargetDropPrompt">
+            <span style="font-size: 28px;">📷 🎬</span>
+            <div style="font-size: 13px; font-weight: 700; color: var(--text-main); margin-top: 4px;">Click or Drag & Drop Target Image or Video</div>
+            <div style="font-size: 11px; color: var(--text-muted);">Supports PNG, JPG, WEBP, MP4, MOV, AVI, MKV</div>
+          </div>
+          <div id="refTargetPreviewContainer" class="hidden" style="display: flex; align-items: center; justify-content: center; gap: 12px;">
+            <img id="refTargetPreviewImg" src="" class="hidden" style="max-height: 110px; max-width: 140px; border-radius: 6px; border: 1px solid var(--border-color); object-fit: contain;" />
+            <video id="refTargetPreviewVideo" src="" class="hidden" style="max-height: 110px; max-width: 140px; border-radius: 6px; border: 1px solid var(--border-color); object-fit: contain;" controls muted></video>
+            <div style="text-align: left; font-size: 11.5px;">
+              <div id="refTargetPreviewName" style="font-weight: 700; color: var(--accent-cyan); word-break: break-all;"></div>
+              <div id="refTargetPreviewDims" style="color: var(--text-muted);"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Target Label -->
+        <div class="control-group">
+          <label for="refTargetLabelInput" style="font-size: 11.5px; font-weight: 700; margin-bottom: 4px; display: block;">Target Label / Identifier:</label>
+          <input type="text" id="refTargetLabelInput" placeholder="e.g. Reference Object, Suspect Vehicle, Video Clip..." />
+        </div>
+
+        <!-- Folder Group Selection -->
+        <div class="control-group">
+          <label for="refTargetGroupSelect" style="font-size: 11.5px; font-weight: 700; margin-bottom: 4px; display: block;">Target Folder Group:</label>
+          <select id="refTargetGroupSelect" onchange="onRefTargetGroupSelectChange()" style="width: 100%; padding: 6px 10px; font-size: 12px; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px;">
+            <option value="default">📁 default</option>
+            <option value="__NEW_FOLDER__">➕ Create New Folder...</option>
+          </select>
+        </div>
+
+        <!-- Custom Folder Name (Hidden by default) -->
+        <div class="control-group hidden" id="refTargetNewGroupContainer">
+          <label for="refTargetNewGroupInput" style="font-size: 11.5px; font-weight: 700; margin-bottom: 4px; display: block; color: var(--accent-cyan);">New Folder Name:</label>
+          <input type="text" id="refTargetNewGroupInput" placeholder="e.g. Stuffed Animals, Suspects, Weapons..." />
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button type="button" class="btn btn-secondary" onclick="closeAddReferenceTargetModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" id="btnSubmitAddRefTarget" onclick="submitAddReferenceTarget()" style="font-weight: 700;">
+          🚀 Add & Recompute Matches
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- MODAL: NEURAL EMBEDDING INVERSION STUDIO -->
+  <div class="modal-overlay hidden" id="reverseEngineerModal" onclick="if(event.target===this)closeReverseEngineerModal()">
+    <div class="modal-dialog modal-xl glass" style="max-width: 920px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 22px;">🧠</span>
+          <h3>Neural Embedding Inversion Studio</h3>
+        </div>
+        <button class="modal-close-btn" onclick="closeReverseEngineerModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+          <p style="font-size: 12px; color: var(--text-muted); margin: 0;">
+            Reverse-engineers visual representations from model latent embeddings via Neural Semantic Maps and Photorealistic Diffusion.
+          </p>
+          <button type="button" class="btn btn-primary btn-xs" id="btnGenDiffusionRecon" onclick="runPhotorealisticDiffusionInversion()" style="font-weight: 700;">
+            🎨 Generate Photorealistic Recreation (unCLIP / SD)
+          </button>
+        </div>
+
+        <div class="inversion-layout-grid" style="display: grid; grid-template-columns: 260px 1fr; gap: 16px;">
+          <!-- Left: Original Image Info -->
+          <div class="inversion-orig-pane glass" style="padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px;">
+            <div style="font-size: 10.5px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Original Evidence</div>
+            <div style="display: flex; justify-content: center; background: #000; border-radius: 6px; overflow: hidden; padding: 4px;">
+              <img id="invStudioOrigImg" src="" style="width: 100%; max-height: 200px; object-fit: contain;" />
+            </div>
+            <div style="font-size: 11px; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
+              <div><strong>File:</strong> <span id="invStudioOrigFilename" style="color: var(--text-main); word-break: break-all;"></span></div>
+              <div><strong>Dims:</strong> <span id="invStudioOrigDims"></span></div>
+              <div><strong>MD5:</strong> <span id="invStudioOrigHash" style="font-family: monospace; font-size: 10px;"></span></div>
+            </div>
+          </div>
+
+          <!-- Right: Inverted Visualizations Gallery -->
+          <div class="inversion-models-pane" style="display: flex; flex-direction: column; gap: 12px;">
+            <!-- Model Selection Tabs -->
+            <div class="inversion-model-tabs" id="invStudioModelTabs" style="display: flex; gap: 6px; flex-wrap: wrap;">
+              <!-- Populated dynamically -->
+            </div>
+
+            <!-- Active Inverted Card Display -->
+            <div class="inversion-display-card glass" id="invStudioDisplayCard" style="padding: 16px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 12px;">
+              <div id="invStudioCardHeader" style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <h4 id="invStudioModelName" style="color: var(--accent-cyan); font-size: 14px; margin: 0;"></h4>
+                  <span id="invStudioModelTag" style="font-size: 11px; color: var(--text-muted);"></span>
+                </div>
+                <div class="inversion-badges" style="display: flex; gap: 6px;">
+                  <span class="badge" id="invStudioSimBadge" style="background: rgba(74,222,128,0.15); color: #4ade80; border: 1px solid #4ade80; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 12px;"></span>
+                  <span class="badge" id="invStudioDimBadge" style="background: rgba(0,242,254,0.15); color: var(--accent-cyan); border: 1px solid var(--accent-cyan); font-size: 11px; padding: 2px 8px; border-radius: 12px;"></span>
+                </div>
+              </div>
+
+              <!-- Inverted Image Canvas Preview -->
+              <div style="display: flex; justify-content: center; align-items: center; background: #080d1a; border-radius: 8px; padding: 12px; border: 1px solid rgba(255,255,255,0.06); min-height: 200px;">
+                <div id="invStudioLoadingState" class="hidden" style="text-align: center; color: var(--accent-cyan);">
+                  <div class="spinner" style="width: 32px; height: 32px; border-width: 3px; margin: 0 auto 8px auto;"></div>
+                  <div style="font-size: 12px; font-weight: 700;">Inverting Latent Embeddings...</div>
+                </div>
+                <img id="invStudioReconImg" src="" style="max-height: 256px; max-width: 256px; border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.6);" />
+              </div>
+
+              <p id="invStudioDesc" style="font-size: 11.5px; color: var(--text-muted); line-height: 1.5; margin: 0;"></p>
+
+              <!-- Action Toolbar -->
+              <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px;">
+                <a id="invStudioDownloadBtn" href="#" download="reverse_engineered_embedding.jpg" class="btn btn-secondary-outline btn-xs">⬇️ Download Inverted Image</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeReverseEngineerModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIRM DELETE REFERENCE TARGET -->
+  <div class="modal-overlay hidden" id="confirmDeleteRefTargetModal" onclick="if(event.target===this)closeConfirmDeleteRefTargetModal()">
+    <div class="modal-dialog modal-sm glass" style="max-width: 440px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 20px;">⚠️</span>
+          <h3 id="confirmDeleteRefTargetTitle">Delete Reference Target</h3>
+        </div>
+        <button class="modal-close-btn" onclick="closeConfirmDeleteRefTargetModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmDeleteRefTargetMsg" style="font-size: 13px; color: var(--text-main); margin-bottom: 8px; line-height: 1.5;">
+          Are you sure you want to delete this target?
+        </p>
+        <p style="font-size: 11px; color: var(--text-muted); margin: 0;">
+          This will remove the target from SQLite and automatically recompute similarity matches across all models.
+        </p>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button type="button" class="btn btn-secondary" onclick="closeConfirmDeleteRefTargetModal()">Cancel</button>
+        <button type="button" class="btn btn-danger" id="btnConfirmDeleteRefTarget" onclick="executeConfirmDeleteRefTarget()" style="background: var(--accent-danger); border-color: var(--accent-danger); font-weight: 700;">
+          🗑️ Delete & Recompute
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Application Script -->
+  <script src="/static/app.js?v=20260904_108"></script>
+</body>
+</html>
+
+

@@ -162,3 +162,4 @@ Thumbs.db
 *.swo
 *~
 .system_generated/
+.venv/

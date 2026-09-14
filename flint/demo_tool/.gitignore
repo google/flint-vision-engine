@@ -1,0 +1,53 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Virtual Environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# User & Session Persistence (local to device)
+flint_session.json
+flint_database.sqlite
+flint_database.sqlite-journal
+test_output_report.*
+uploads/*
+!uploads/.gitkeep
+models/*
+!models/.gitkeep
+
+# IDE & OS files
+.DS_Store
+.vscode/
+.idea/
