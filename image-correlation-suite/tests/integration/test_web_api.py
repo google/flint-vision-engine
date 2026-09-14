@@ -1,5 +1,16 @@
 # Copyright 2026 Google LLC
-# Licensed under Apache 2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 """
 Integration tests for SYMPICS Web Server REST APIs and Security Sandbox.
@@ -7,6 +18,26 @@ Integration tests for SYMPICS Web Server REST APIs and Security Sandbox.
 import urllib.request
 import json
 import pytest
+import socket
+import threading
+from http.server import ThreadingHTTPServer
+from web.server import SympicsHTTPHandler
+
+
+@pytest.fixture(scope="session", autouse=True)
+def ensure_web_server():
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    is_running = (sock.connect_ex(("localhost", 8080)) == 0)
+    sock.close()
+
+    if not is_running:
+        server = ThreadingHTTPServer(("localhost", 8080), SympicsHTTPHandler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        yield
+        server.shutdown()
+    else:
+        yield
 
 
 def make_request(path, method="GET", body=None):
