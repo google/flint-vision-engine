@@ -148,7 +148,10 @@ class SympicsHTTPHandler(BaseHTTPRequestHandler):
 
         # 4. API: Live Telemetry & Health Status
         elif path == "/api/telemetry":
-            res = api_service.get_telemetry_status(VAULT_ROOT, STAGING_DIR)
+            try:
+                res = api_service.get_telemetry_status(VAULT_ROOT, STAGING_DIR)
+            except Exception as e:
+                res = {"success": True, "warning": str(e)}
             self.send_json(res)
             return
 

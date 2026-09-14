@@ -95,6 +95,22 @@ def load_db_config():
                 cfg.update(saved_cfg)
         except Exception:
             pass
+
+    # Environment variables take precedence when explicitly set
+    if os.environ.get("SYMPICS_PG_DB") or os.environ.get("PGDATABASE"):
+        cfg["database"] = os.environ.get("SYMPICS_PG_DB") or os.environ.get("PGDATABASE")
+    if os.environ.get("SYMPICS_PG_HOST") or os.environ.get("PGHOST"):
+        cfg["host"] = os.environ.get("SYMPICS_PG_HOST") or os.environ.get("PGHOST")
+    if os.environ.get("SYMPICS_PG_PORT") or os.environ.get("PGPORT"):
+        try:
+            cfg["port"] = int(os.environ.get("SYMPICS_PG_PORT") or os.environ.get("PGPORT"))
+        except ValueError:
+            pass
+    if os.environ.get("SYMPICS_PG_USER") or os.environ.get("PGUSER"):
+        cfg["user"] = os.environ.get("SYMPICS_PG_USER") or os.environ.get("PGUSER")
+    if os.environ.get("SYMPICS_PG_PASSWORD") or os.environ.get("PGPASSWORD"):
+        cfg["password"] = os.environ.get("SYMPICS_PG_PASSWORD") or os.environ.get("PGPASSWORD")
+
     return cfg
 
 
@@ -238,13 +254,19 @@ def init_db(config=None):
     Initializes the PostgreSQL database with the complete schema:
     1. schema_migration_manifest.sql
     2. schema_core_tables.sql
+    3. schema_reference_catalog.sql
+    4. schema_verification_audit.sql
     """
     cfg = config or load_db_config()
     target_db = cfg.get("database", "sympics_db")
     base_dir = os.path.dirname(os.path.abspath(__file__))
     
-    schema_manifest_file = os.path.join(base_dir, "schema_migration_manifest.sql")
-    schema_core_file = os.path.join(base_dir, "schema_core_tables.sql")
+    schema_files = [
+        os.path.join(base_dir, "schema_migration_manifest.sql"),
+        os.path.join(base_dir, "schema_core_tables.sql"),
+        os.path.join(base_dir, "schema_reference_catalog.sql"),
+        os.path.join(base_dir, "schema_verification_audit.sql"),
+    ]
 
     # Step 1: Ensure target database exists
     maintenance_kwargs = {
@@ -262,7 +284,10 @@ def init_db(config=None):
         with m_conn.cursor() as cur:
             cur.execute("SELECT 1 FROM pg_database WHERE datname = %s", (target_db,))
             if not cur.fetchone():
-                cur.execute(f'CREATE DATABASE "{target_db}"')
+                try:
+                    cur.execute(f'CREATE DATABASE "{target_db}"')
+                except Exception:
+                    cur.execute(f'CREATE DATABASE "{target_db}" TEMPLATE template0')
                 print(f"[+] Created PostgreSQL database: '{target_db}'")
             else:
                 print(f"[*] Database '{target_db}' is active.")
@@ -277,15 +302,10 @@ def init_db(config=None):
             # Enable vector extension first
             cur.execute("CREATE EXTENSION IF NOT EXISTS vector;")
             
-            # 1. Apply Manifest Schema
-            if os.path.exists(schema_manifest_file):
-                with open(schema_manifest_file, "r", encoding="utf-8") as f:
-                    cur.execute(f.read())
-                    
-            # 2. Apply Core Production Schema
-            if os.path.exists(schema_core_file):
-                with open(schema_core_file, "r", encoding="utf-8") as f:
-                    cur.execute(f.read())
+            for sf in schema_files:
+                if os.path.exists(sf):
+                    with open(sf, "r", encoding="utf-8") as f:
+                        cur.execute(f.read())
 
         conn.commit()
         print(f"[+] Successfully applied complete schema to '{target_db}'.")

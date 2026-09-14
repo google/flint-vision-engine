@@ -56,6 +56,13 @@ def main():
     current_cfg = db.load_db_config()
     current_os_user = getpass.getuser()
 
+    if not sys.stdin.isatty():
+        print("[*] Non-interactive environment detected (CI/Automation). Initializing schema with configured parameters...")
+        working_cfg = current_cfg
+        db.init_db(working_cfg)
+        print(" [+] Non-interactive database initialization complete.")
+        return
+
     print("[*] Detecting available PostgreSQL connection methods...")
     
     # Check if local peer socket connection works right away

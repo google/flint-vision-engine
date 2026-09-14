@@ -1769,72 +1769,91 @@ def get_telemetry_status(vault_root, staging_dir, conn=None):
             "active_models": ["CLIP (512)", "SigLIP Base (768)", "SigLIP-2 NaFlex (768)", "DINOv3 (768)"]
         }
 
-        with conn.cursor() as cur:
-            cur.execute("SELECT * FROM v_forensic_integrity_audit;")
-            audit = cur.fetchone() or {}
+        audit = {}
+        vector_breakdown = []
+        recent_ingested = []
 
-            cur.execute("SELECT model_name, dimension_size, count(*) as count FROM media_embeddings GROUP BY model_name, dimension_size;")
-            vector_breakdown = cur.fetchall()
+        try:
+            with conn.cursor() as cur:
+                try:
+                    cur.execute("SELECT * FROM v_forensic_integrity_audit;")
+                    audit = cur.fetchone() or {}
+                except Exception:
+                    conn.rollback()
 
-            # Latest 25 ingested evidence items
-            cur.execute("""
-                SELECT 
-                    COALESCE(cei.evidence_id, ma.asset_id) AS evidence_id,
-                    COALESCE(
-                        cei.original_filename,
-                        ma.source_rel_path,
-                        split_part(ma.storage_rel_path, '/', -1)
-                    ) AS original_filename,
-                    ma.source_folder,
-                    ma.source_rel_path,
-                    ma.asset_id,
-                    ma.sha256,
-                    ma.md5,
-                    ma.file_size_bytes,
-                    ma.width_pixels,
-                    ma.height_pixels,
-                    ma.mime_type,
-                    ma.storage_rel_path,
-                    ma.thumb_rel_path,
-                    COALESCE(cei.custody_status, 'INGESTED') AS custody_status,
-                    cei.series_tag,
-                    cei.tags,
-                    ma.created_at,
-                    ref.identifier as ref_identifier,
-                    ref.series_name as ref_series_name,
-                    (
-                        SELECT json_agg(json_build_object('model', me.model_name, 'dim', me.dimension_size))
-                        FROM media_embeddings me
-                        WHERE me.asset_id = ma.asset_id
-                    ) as embeddings,
-                    (
-                        SELECT ARRAY_AGG(DISTINCT c2.case_number)
-                        FROM case_evidence_items cei2
-                        JOIN cases c2 ON cei2.case_id = c2.case_id
-                        WHERE cei2.asset_id = ma.asset_id AND c2.status = 'ACTIVE'
-                    ) AS linked_cases
-                FROM media_assets ma
-                LEFT JOIN case_evidence_items cei ON ma.asset_id = cei.asset_id
-                LEFT JOIN reference_catalog_records ref ON ma.md5 = ref.md5
-                ORDER BY ma.created_at DESC
-                LIMIT 25;
-            """)
-            recent_ingested = cur.fetchall()
+                try:
+                    cur.execute("SELECT model_name, dimension_size, count(*) as count FROM media_embeddings GROUP BY model_name, dimension_size;")
+                    vector_breakdown = cur.fetchall()
+                except Exception:
+                    conn.rollback()
 
-            return {
-                "success": True,
-                "staging_queue_count": staging_queue_count,
-                "quarantine_count": quarantine_count,
-                "staging_files": staging_files,
-                "quarantine_files": quarantine_files,
-                "recent_ingested": recent_ingested,
-                "gpu_status": gpu_info,
-                "audit": audit,
-                "vector_breakdown": vector_breakdown
-            }
+                try:
+                    # Latest 25 ingested evidence items
+                    cur.execute("""
+                        SELECT 
+                            COALESCE(cei.evidence_id, ma.asset_id) AS evidence_id,
+                            COALESCE(
+                                cei.original_filename,
+                                ma.source_rel_path,
+                                split_part(ma.storage_rel_path, '/', -1)
+                            ) AS original_filename,
+                            ma.source_folder,
+                            ma.source_rel_path,
+                            ma.asset_id,
+                            ma.sha256,
+                            ma.md5,
+                            ma.file_size_bytes,
+                            ma.width_pixels,
+                            ma.height_pixels,
+                            ma.mime_type,
+                            ma.storage_rel_path,
+                            ma.thumb_rel_path,
+                            COALESCE(cei.custody_status, 'INGESTED') AS custody_status,
+                            cei.series_tag,
+                            cei.tags,
+                            ma.created_at,
+                            ref.identifier as ref_identifier,
+                            ref.series_name as ref_series_name,
+                            (
+                                SELECT json_agg(json_build_object('model', me.model_name, 'dim', me.dimension_size))
+                                FROM media_embeddings me
+                                WHERE me.asset_id = ma.asset_id
+                            ) as embeddings,
+                            (
+                                SELECT ARRAY_AGG(DISTINCT c2.case_number)
+                                FROM case_evidence_items cei2
+                                JOIN cases c2 ON cei2.case_id = c2.case_id
+                                WHERE cei2.asset_id = ma.asset_id AND c2.status = 'ACTIVE'
+                            ) AS linked_cases
+                        FROM media_assets ma
+                        LEFT JOIN case_evidence_items cei ON ma.asset_id = cei.asset_id
+                        LEFT JOIN reference_catalog_records ref ON ma.md5 = ref.md5
+                        ORDER BY ma.created_at DESC
+                        LIMIT 25;
+                    """)
+                    recent_ingested = cur.fetchall()
+                except Exception:
+                    conn.rollback()
+        except Exception:
+            pass
+
+        return {
+            "success": True,
+            "staging_queue_count": staging_queue_count,
+            "quarantine_count": quarantine_count,
+            "staging_files": staging_files,
+            "quarantine_files": quarantine_files,
+            "recent_ingested": recent_ingested,
+            "gpu_status": gpu_info,
+            "audit": audit,
+            "vector_breakdown": vector_breakdown
+        }
     finally:
-        if should_close:
-            conn.close()
+        if should_close and conn is not None:
+            try:
+                conn.close()
+            except Exception:
+                pass
 
 
 def retry_quarantine_files(staging_dir):

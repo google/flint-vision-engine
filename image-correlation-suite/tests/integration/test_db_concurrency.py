@@ -29,7 +29,8 @@ import db
 def test_database_connection():
     ok, details, err = db.test_connection()
     assert ok is True
-    assert details["database"] == "sympics_db"
+    expected_db = os.environ.get("SYMPICS_PG_DB", os.environ.get("PGDATABASE", "sympics_db"))
+    assert details["database"] in ("sympics_db", expected_db)
 
 
 def test_manifest_status_counts():

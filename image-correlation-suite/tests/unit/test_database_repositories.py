@@ -15,6 +15,7 @@
 """
 Unit tests for database repository classes and connection management.
 """
+import os
 from sympics.database.connection import connection_manager
 from sympics.database.repositories.asset_repo import MediaAssetRepository
 from sympics.database.repositories.manifest_repo import ManifestRepository
@@ -24,7 +25,8 @@ from sympics.database.repositories.case_repo import CaseRepository
 def test_connection_manager_defaults():
     cfg = connection_manager.get_default_config()
     assert "database" in cfg
-    assert cfg["database"] == "sympics_db"
+    expected_db = os.environ.get("SYMPICS_PG_DB", os.environ.get("PGDATABASE", "sympics_db"))
+    assert cfg["database"] in ("sympics_db", expected_db)
 
 
 def test_repository_instantiation():

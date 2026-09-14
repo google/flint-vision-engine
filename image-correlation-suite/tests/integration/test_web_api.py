@@ -18,6 +18,26 @@ Integration tests for SYMPICS Web Server REST APIs and Security Sandbox.
 import urllib.request
 import json
 import pytest
+import socket
+import threading
+from http.server import ThreadingHTTPServer
+from web.server import SympicsHTTPHandler
+
+
+@pytest.fixture(scope="session", autouse=True)
+def ensure_web_server():
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    is_running = (sock.connect_ex(("localhost", 8080)) == 0)
+    sock.close()
+
+    if not is_running:
+        server = ThreadingHTTPServer(("localhost", 8080), SympicsHTTPHandler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        yield
+        server.shutdown()
+    else:
+        yield
 
 
 def make_request(path, method="GET", body=None):
