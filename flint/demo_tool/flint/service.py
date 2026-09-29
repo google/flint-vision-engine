@@ -37,6 +37,7 @@ import urllib.parse
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 import numpy as np
 from PIL import Image, ImageOps
+from PIL.ExifTags import TAGS, GPSTAGS
 
 from flint.db import IMAGE_EXTENSIONS, VIDEO_EXTENSIONS, MediaDatabase
 from flint.engine import FlintEngine
@@ -93,6 +94,46 @@ def clean_path(p: str) -> str:
   return os.path.abspath(p)
 
 
+
+def _get_decimal_from_dms(dms, ref):
+  try:
+    degrees = float(dms[0])
+    minutes = float(dms[1])
+    seconds = float(dms[2])
+    dec = degrees + minutes/60.0 + seconds/3600.0
+    if ref in ['S', 'W']:
+      dec = -dec
+    return dec
+  except:
+    return None
+
+def extract_exif(filename: str) -> dict:
+  try:
+    with Image.open(filename) as img:
+      exif_data = img.getexif()
+      if not exif_data:
+        return {}
+      labeled = {}
+      for k, v in exif_data.items():
+        tag = TAGS.get(k, k)
+        try:
+          if isinstance(v, bytes):
+            labeled[tag] = v.decode('utf-8', errors='ignore')
+          else:
+            labeled[tag] = str(v)
+        except:
+          labeled[tag] = str(v)
+      gps_info = exif_data.get_ifd(0x8825)
+      if gps_info:
+        gps_dict = {GPSTAGS.get(t, t): gps_info[t] for t in gps_info}
+        if 'GPSLatitude' in gps_dict and 'GPSLongitude' in gps_dict:
+          lat = _get_decimal_from_dms(gps_dict['GPSLatitude'], gps_dict.get('GPSLatitudeRef', 'N'))
+          lon = _get_decimal_from_dms(gps_dict['GPSLongitude'], gps_dict.get('GPSLongitudeRef', 'E'))
+          if lat is not None and lon is not None:
+            labeled['gps_link'] = f"https://www.google.com/maps?q={lat},{lon}"
+      return labeled
+  except Exception:
+    return {}
 def group_matches_by_media(raw_matches: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
   """
   Groups raw matches so video keyframes are strictly collapsed into a single parent video file card.
@@ -146,6 +187,7 @@ def group_matches_by_media(raw_matches: List[Dict[str, Any]]) -> List[Dict[str, 
             'keyframes_count': 1,
             'width': m.get('width', 0),
             'height': m.get('height', 0),
+            'exif_data': extract_exif(v_path.replace('video://', '') if 'video://' in v_path else v_path),
         }
         video_map[v_path] = v_item
         grouped_items.append(v_item)
@@ -168,11 +210,27 @@ def group_matches_by_media(raw_matches: List[Dict[str, Any]]) -> List[Dict[str, 
       img_item = dict(m)
       img_item['media_type'] = 'image'
       img_item['filename'] = os.path.basename(m['file_path'])
+      img_item['exif_data'] = extract_exif(m['file_path'])
       grouped_items.append(img_item)
 
-  # Sort all keyframes inside each video by timestamp
+  # Sort all keyframes inside each video by timestamp and aggregate per-target max scores across keyframes
   for v in video_map.values():
     v['keyframes'].sort(key=lambda k: k.get('timestamp_seconds', 0.0))
+    target_best_map = {}
+    target_order = []
+    for kf in v['keyframes']:
+      for ts in kf.get('all_target_scores', []):
+        if isinstance(ts, dict):
+          t_key = ts.get('target_path') or ts.get('target_label') or ''
+          if not t_key:
+            continue
+          if t_key not in target_best_map:
+            target_best_map[t_key] = dict(ts)
+            target_order.append(t_key)
+          elif ts.get('score', -999.0) > target_best_map[t_key].get('score', -999.0):
+            target_best_map[t_key] = dict(ts)
+    if target_order:
+      v['all_target_scores'] = [target_best_map[k] for k in target_order]
 
   # Sort all items by overall score descending
   grouped_items.sort(key=lambda x: x['score'], reverse=True)
@@ -380,13 +438,13 @@ class FlintService:
 
     all_db_targets = self.db.get_all_known_targets()
     active_target_paths = []
-    if known_targets:
+    if all_db_targets:
+      active_target_paths = [t for t in all_db_targets if t.get('file_path') and os.path.exists(clean_path(t['file_path']))]
+    elif known_targets:
       if isinstance(known_targets, str):
         active_target_paths = [clean_path(known_targets)]
       else:
-        active_target_paths = [clean_path(p) for p in known_targets if p and os.path.exists(clean_path(p))]
-    elif all_db_targets:
-      active_target_paths = [t['file_path'] for t in all_db_targets if t.get('file_path') and os.path.exists(clean_path(t['file_path']))]
+        active_target_paths = [clean_path(p) if isinstance(p, str) else p for p in known_targets if p]
     else:
       # Check session file for saved knownPath or reference_targets
       session_file_p = os.path.abspath("flint_session.json")
@@ -867,15 +925,18 @@ class FlintService:
     elapsed_ms = (time.time() - t0) * 1000.0
 
     query_summary = f"Multi-model visual match ({len(models_to_run)} models, {len(targets_info)} known targets)"
-    self.db.log_search_run(
-        query_type="visual_multi_model",
-        query_summary=query_summary,
-        model_name=primary_model,
-        threshold=threshold,
-        metric=metric,
-        results_count=len(primary_matches),
-        duration_ms=elapsed_ms,
-    )
+    try:
+      self.db.log_search_run(
+          query_type="visual_multi_model",
+          query_summary=query_summary,
+          model_name=primary_model,
+          threshold=threshold,
+          metric=metric,
+          results_count=len(primary_matches),
+          duration_ms=elapsed_ms,
+      )
+    except Exception:
+      pass
 
     return {
         'query_type': 'visual_similarity',
@@ -1089,6 +1150,7 @@ class FlintService:
     """Performs multi-model crop similarity search with optional DINOv3 Dense Spatial Patch Alignment."""
     t0 = time.time()
     from PIL import Image, ImageOps
+    from PIL.ExifTags import TAGS, GPSTAGS
     import io, base64, cv2
     from flint.patch_matcher import (
         extract_dense_patch_tokens,
@@ -1251,14 +1313,14 @@ class FlintService:
         target_entry = {
             'target_label': src_label,
             'target_path': image_path or video_path or src_file,
-            'target_thumb': snippet_url,
+            'target_thumb': "",
             'crop_box': actual_bbox,
             'score': m_item['score'],
             'similarity_pct': m_item.get('similarity_pct', round(m_item['score'] * 100, 2)),
         }
         m_item['best_target_label'] = src_label
         m_item['best_target_path'] = image_path or video_path or src_file
-        m_item['best_target_thumb'] = snippet_url
+        m_item['best_target_thumb'] = ""
         m_item['all_target_scores'] = [target_entry]
 
       grouped = group_matches_by_media(raw_matches)

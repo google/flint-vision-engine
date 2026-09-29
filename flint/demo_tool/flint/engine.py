@@ -114,6 +114,7 @@ class FlintEngine:
         self.processor = AutoImageProcessor.from_pretrained(
             self.model_path, local_files_only=True
         )
+
       self.model = AutoModel.from_pretrained(
           self.model_path, local_files_only=True
       ).to(self.device)

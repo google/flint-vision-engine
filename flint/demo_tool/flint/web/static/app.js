@@ -1,17 +1,3 @@
-// Copyright 2026 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 function getModelFullName(mKey) {
   if (!mKey) return 'Model';
   if (mKey.includes('clip-vit-b-32')) return 'CLIP ViT-B/32 (Fast Baseline)';
@@ -644,7 +630,7 @@ async function handleLoadKnownPath() {
       renderKnownGallery();
       showToast(`Loaded ${data.targets.length} reference targets!`, 'success');
     } else {
-      const fname = p.split('/').pop();
+      const fname = p.split(/[\/\\]/).pop();
       appState.knownTargets = [{ label: fname, file_path: p }];
       appState.knownImages = [{
         label: fname,
@@ -655,7 +641,7 @@ async function handleLoadKnownPath() {
       showToast(`Loaded reference target: ${fname}`, 'success');
     }
   } catch (err) {
-    const fname = p.split('/').pop();
+    const fname = p.split(/[\/\\]/).pop();
     appState.knownTargets = [{ label: fname, file_path: p }];
     appState.knownImages = [{
       label: fname,
@@ -1098,7 +1084,7 @@ function initInvestigateWorkspace() {
     appState.investigateEvidenceList = res.matches || [];
   }
 
-  const folderName = res.unknown_folder ? res.unknown_folder.split('/').pop() : 'Full Database';
+  const folderName = res.unknown_folder ? res.unknown_folder.split(/[\/\\]/).pop() : 'Full Database';
   const caseBadge = document.getElementById('investigateCaseBadge');
   if (caseBadge) caseBadge.innerText = `📁 ${folderName} Investigation (${computedKeys.length} Models Computed)`;
 
@@ -1255,7 +1241,7 @@ window.selectFolderTargets = function(folderNameEnc, selectAll) {
     let groupName = t.group_name;
     if (!groupName || groupName === 'default' || groupName === 'Reference') {
       if (t.file_path) {
-        const parts = t.file_path.split('/').filter(Boolean);
+        const parts = t.file_path.split(/[\/\\]/).filter(Boolean);
         if (parts.length >= 2) {
           const parentFolder = parts[parts.length - 2];
           groupName = (parentFolder && parentFolder !== 'known_files' && parentFolder !== 'test_images') ? parentFolder : 'General';
@@ -1314,6 +1300,85 @@ function updateInvestigateTreeSummary() {
   });
 }
 
+
+window.onExifPresetChange = function() {
+  const preset = document.getElementById('exifDatePresetSelect').value;
+  const customInputs = document.getElementById('exifCustomDateInputs');
+  const presetInputs = document.getElementById('exifPresetInputs');
+  const presetValue = document.getElementById('exifPresetValue');
+  
+  if (preset === 'custom') {
+    customInputs.style.display = 'block';
+    presetInputs.style.display = 'none';
+  } else if (preset === 'none') {
+    customInputs.style.display = 'none';
+    presetInputs.style.display = 'none';
+  } else {
+    customInputs.style.display = 'none';
+    presetInputs.style.display = 'block';
+    presetValue.innerHTML = '';
+    if (preset === 'preset_month') {
+      const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      months.forEach((m, i) => {
+        presetValue.options.add(new Option(m, i + 1));
+      });
+    } else if (preset === 'preset_season') {
+      const seasons = ['Spring', 'Summer', 'Autumn', 'Winter'];
+      seasons.forEach(s => {
+        presetValue.options.add(new Option(s, s.toLowerCase()));
+      });
+    } else if (preset === 'preset_year') {
+      presetInputs.style.display = 'block';
+      presetValue.style.display = 'none'; // Only show year input
+    }
+    if (preset !== 'preset_year') {
+      presetValue.style.display = 'block';
+    }
+  }
+};
+
+window.clearExifFilters = function() {
+  document.querySelectorAll('.exif-device-cb').forEach(cb => cb.checked = false);
+  document.getElementById('exifDatePresetSelect').value = 'none';
+  if (document.getElementById('exifBaseDate')) document.getElementById('exifBaseDate').value = '';
+  onExifPresetChange();
+  applyInvestigateFilters();
+};
+
+window.populateExifDevices = function(items) {
+  const container = document.getElementById('exifDeviceFiltersContainer');
+  if (!container) return;
+  const devices = new Set();
+  items.forEach(item => {
+    const ex = item.exif_data || {};
+    if (ex.Make || ex.Model) {
+      devices.add([ex.Make, ex.Model].filter(Boolean).join(' ').trim());
+    }
+  });
+  
+  if (devices.size === 0) {
+    container.innerHTML = '<div style="color: var(--text-muted);">No devices found in current set</div>';
+    return;
+  }
+  
+  const sorted = Array.from(devices).sort();
+  container.innerHTML = sorted.map(d => `
+    <label style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
+      <input type="checkbox" class="exif-device-cb" value="${d.replace(/"/g, '&quot;')}">
+      ${d}
+    </label>
+  `).join('');
+};
+
+function parseExifDate(dateStr) {
+  if (!dateStr) return null;
+  const parts = dateStr.split(/[: ]/);
+  if (parts.length >= 3) {
+    return new Date(parts[0], parts[1]-1, parts[2], parts[3]||0, parts[4]||0, parts[5]||0).getTime();
+  }
+  return null;
+}
+
 window.applyInvestigateFilters = function() {
   const rawList = appState.investigateEvidenceList || [];
   const searchTxt = (document.getElementById('invSearchInput')?.value || '').toLowerCase().trim();
@@ -1327,17 +1392,66 @@ window.applyInvestigateFilters = function() {
   const totalTargets = allTargets.length;
   const isSubsetSelected = !appState.activeCropResults && !appState.investigateSearchQuery && totalTargets > 0 && selectedTargets.size > 0 && selectedTargets.size < totalTargets;
 
+  if (appState._lastPopulatedList !== rawList) {
+    populateExifDevices(rawList);
+    appState._lastPopulatedList = rawList;
+  }
+
+  // Parse EXIF Filters
+  const selectedDevices = Array.from(document.querySelectorAll('.exif-device-cb:checked')).map(cb => cb.value);
+  const datePreset = document.getElementById('exifDatePresetSelect')?.value || 'none';
+  
+  let minDate = null;
+  let maxDate = null;
+  
+  if (datePreset === 'custom') {
+    const baseStr = document.getElementById('exifBaseDate')?.value;
+    if (baseStr) {
+      const baseMs = new Date(baseStr).getTime();
+      const num = parseInt(document.getElementById('exifDateNum')?.value || '1');
+      const unit = document.getElementById('exifDateUnit')?.value || 'days';
+      const dir = document.getElementById('exifDateDirection')?.value || 'before_after';
+      
+      let mult = 24 * 60 * 60 * 1000;
+      if (unit === 'weeks') mult *= 7;
+      if (unit === 'years') mult *= 365;
+      
+      const diffMs = num * mult;
+      
+      if (dir === 'before' || dir === 'before_after') minDate = baseMs - diffMs;
+      if (dir === 'after' || dir === 'before_after') maxDate = baseMs + diffMs;
+      if (dir === 'before') maxDate = baseMs;
+      if (dir === 'after') minDate = baseMs;
+    }
+  } else if (datePreset === 'preset_month') {
+    const y = parseInt(document.getElementById('exifPresetYear')?.value || '2024');
+    const m = parseInt(document.getElementById('exifPresetValue')?.value || '1') - 1;
+    minDate = new Date(y, m, 1).getTime();
+    maxDate = new Date(y, m + 1, 0, 23, 59, 59).getTime();
+  } else if (datePreset === 'preset_season') {
+    const y = parseInt(document.getElementById('exifPresetYear')?.value || '2024');
+    const s = document.getElementById('exifPresetValue')?.value;
+    if (s === 'spring') { minDate = new Date(y, 2, 1).getTime(); maxDate = new Date(y, 4, 31, 23, 59, 59).getTime(); }
+    if (s === 'summer') { minDate = new Date(y, 5, 1).getTime(); maxDate = new Date(y, 7, 31, 23, 59, 59).getTime(); }
+    if (s === 'autumn') { minDate = new Date(y, 8, 1).getTime(); maxDate = new Date(y, 10, 30, 23, 59, 59).getTime(); }
+    if (s === 'winter') { minDate = new Date(y, 11, 1).getTime(); maxDate = new Date(y+1, 1, 28, 23, 59, 59).getTime(); }
+  } else if (datePreset === 'preset_year') {
+    const y = parseInt(document.getElementById('exifPresetYear')?.value || '2024');
+    minDate = new Date(y, 0, 1).getTime();
+    maxDate = new Date(y, 11, 31, 23, 59, 59).getTime();
+  }
+
   let filtered = [];
 
   const matchesSelected = (tPath, tLabel) => {
     if (!tPath && !tLabel) return false;
     if (selectedTargets.has(tPath) || selectedTargets.has(tLabel)) return true;
-    const tFname = tPath ? tPath.split('/').pop() : '';
+    const tFname = tPath ? tPath.split(/[\/\\]/).pop() : '';
     const tBase = tFname ? tFname.replace(/\.[^/.]+$/, '') : (tLabel ? tLabel.replace(/\.[^/.]+$/, '') : '');
     if (tFname && selectedTargets.has(tFname)) return true;
     if (tBase && selectedTargets.has(tBase)) return true;
     for (const sel of selectedTargets) {
-      const selBase = sel.split('/').pop().replace(/\.[^/.]+$/, '');
+      const selBase = sel.split(/[\/\\]/).pop().replace(/\.[^/.]+$/, '');
       if (sel === tPath || sel === tLabel || sel === tFname || (selBase && (selBase === tBase || sel.includes(tBase) || tPath.includes(selBase)))) {
         return true;
       }
@@ -1349,7 +1463,25 @@ window.applyInvestigateFilters = function() {
     const itemId = item.id || item.file_path;
     if (appState.investigateHiddenIds.has(itemId)) continue;
 
-    const fname = (item.filename || item.file_path.split('/').pop() || '').toLowerCase();
+    if (selectedDevices.length > 0 || minDate !== null || maxDate !== null) {
+      const ex = item.exif_data || {};
+      
+      if (selectedDevices.length > 0) {
+        const dev = [ex.Make, ex.Model].filter(Boolean).join(' ').trim();
+        if (!selectedDevices.includes(dev)) continue;
+      }
+      
+      if (minDate !== null || maxDate !== null) {
+        if (!ex.DateTime) continue;
+        const t = parseExifDate(ex.DateTime);
+        if (!t) continue;
+        if (minDate !== null && t < minDate) continue;
+        if (maxDate !== null && t > maxDate) continue;
+      }
+    }
+
+
+    const fname = (item.filename || item.file_path.split(/[\/\\]/).pop() || '').toLowerCase();
     const fpath = (item.file_path || '').toLowerCase();
     if (searchTxt && !fname.includes(searchTxt) && !fpath.includes(searchTxt)) {
       continue;
@@ -1383,7 +1515,10 @@ window.applyInvestigateFilters = function() {
             const tPath = tObj.target_path || tObj.file_path || (allTargets[i] && allTargets[i].file_path) || '';
             const tLabel = tObj.target_label || tObj.label || (allTargets[i] && allTargets[i].label) || '';
 
-            if (matchesSelected(tPath, tLabel) || (allTargets[i] && matchesSelected(allTargets[i].file_path, allTargets[i].label))) {
+            const isEntryMatched = (typeof entry === 'object' && entry !== null)
+              ? matchesSelected(tPath, tLabel)
+              : Boolean(allTargets[i] && matchesSelected(allTargets[i].file_path, allTargets[i].label));
+            if (isEntryMatched) {
               const scoreVal = (typeof entry === 'object' && entry !== null) ? (entry.score ?? 0.0) : (typeof entry === 'number' ? entry : 0.0);
               const pctVal = (typeof entry === 'object' && entry !== null) ? (entry.similarity_pct ?? (scoreVal * 100)) : (scoreVal * 100);
               matchedTargetScores.push({
@@ -1397,7 +1532,8 @@ window.applyInvestigateFilters = function() {
 
           if (matchedTargetScores.length > 0) {
             isTargetSelected = true;
-            if (appState.dinov3PatchMode === 'avg') {
+            const aggMode = document.getElementById('aggregationSelect')?.value || 'max';
+            if (aggMode === 'avg') {
               const avgScore = matchedTargetScores.reduce((acc, t) => acc + t.score, 0) / matchedTargetScores.length;
               const avgPct = matchedTargetScores.reduce((acc, t) => acc + t.similarity_pct, 0) / matchedTargetScores.length;
               effectiveScore = avgPct;
@@ -1529,7 +1665,7 @@ function renderInvestigateGrid(items) {
   grid.innerHTML = items.map((item, idx) => {
     const isVideo = isVideoMedia(item);
     const fpath = item.file_path || '';
-    const fname = item.filename || fpath.split('/').pop() || 'media';
+    const fname = item.filename || fpath.split(/[\/\\]/).pop() || 'media';
     const scorePct = item.display_similarity_pct !== undefined ? item.display_similarity_pct : (item.similarity_pct !== undefined ? item.similarity_pct : (item.score * 100).toFixed(1));
     const scoreClass = scorePct >= 85 ? 'match-high' : scorePct >= 65 ? 'match-med' : 'match-none';
     let scorePrefix = '';
@@ -1537,7 +1673,7 @@ function renderInvestigateGrid(items) {
       scorePrefix = appState.dinov3PatchMode === 'avg' ? '📊 Mean ' : '🏆 Max ';
     }
     const scoreLabel = scorePct > 0 ? `${scorePrefix}${scorePct}% Match` : 'Scanned No Match';
-    const seriesName = fpath ? (fpath.split('/').slice(-2, -1)[0] || 'evidence') : 'evidence';
+    const seriesName = fpath ? (fpath.split(/[\/\\]/).slice(-2, -1)[0] || 'evidence') : 'evidence';
 
     const thumbImgPath = isVideo && item.top_keyframe ? item.top_keyframe.file_path : fpath;
     const thumbUrl = `/api/media/preview?path=${encodeURIComponent(thumbImgPath)}&thumb=1&v=20260823_91`;
@@ -1546,7 +1682,41 @@ function renderInvestigateGrid(items) {
     const targetPath = item.display_target_path || item.best_target_path || (isVideo && item.top_keyframe ? item.top_keyframe.best_target_path : '') || '';
     const targetThumbUrl = targetPath ? `/api/media/preview?path=${encodeURIComponent(targetPath)}&thumb=1&v=20260823_91` : '';
 
-    const exifInfo = `${item.width || 0} × ${item.height || 0} px`;
+    const exifData = item.exif_data || {};
+    let metadataHtml = `
+      <div class="card-exif-line" title="Dimensions: ${item.width || 0} × ${item.height || 0} px">
+        📷 Dims: ${item.width || 0} × ${item.height || 0} px
+      </div>
+    `;
+    if (fname) {
+      metadataHtml += `
+        <div class="card-exif-line" title="Filename: ${fname}">
+          📄 File: ${fname}
+        </div>
+      `;
+    }
+    if (exifData.DateTime) {
+      metadataHtml += `
+        <div class="card-exif-line" title="Created: ${exifData.DateTime}">
+          🕒 Created: ${exifData.DateTime}
+        </div>
+      `;
+    }
+    if (exifData.Make || exifData.Model) {
+      const deviceStr = [exifData.Make, exifData.Model].filter(Boolean).join(' ');
+      metadataHtml += `
+        <div class="card-exif-line" title="Device: ${deviceStr}">
+          📱 Device: ${deviceStr}
+        </div>
+      `;
+    }
+    if (exifData.gps_link) {
+      metadataHtml += `
+        <div class="card-exif-line" title="Location: GPS Data Available">
+          📍 Loc: <a href="${exifData.gps_link}" target="_blank" onclick="event.stopPropagation();" style="color: var(--accent-cyan); text-decoration: underline;">Google Maps</a>
+        </div>
+      `;
+    }
     const rankOrder = `${idx + 1}/${items.length}`;
 
     return `
@@ -1616,9 +1786,7 @@ ${item.all_model_scores && Object.keys(item.all_model_scores).length > 1 ? `
             </div>
           ` : ''}
 
-          <div class="card-exif-line" title="Dimensions: ${exifInfo}">
-            📷 Dims: ${exifInfo}
-          </div>
+          ${metadataHtml}
 
           <div class="card-actions-row">
             <button class="btn-card-action" onclick="event.stopPropagation(); triggerInvestigateCrop('${encodeURIComponent(thumbImgPath)}', '${fname}')" title="Crop and search target region">
@@ -1762,7 +1930,7 @@ window.toggleSidebarSection = function(headerEl) {
 window.openInvestigateDetailModal = function(item) {
   appState.activeDetailItem = item;
   const modal = document.getElementById('investigateDetailModal');
-  const fname = item.filename || item.file_path.split('/').pop();
+  const fname = item.filename || item.file_path.split(/[\/\\]/).pop();
 
   document.getElementById('detailFilename').innerText = fname;
   document.getElementById('detailPath').innerText = item.file_path;
@@ -2096,7 +2264,7 @@ window.runDetailCropSearch = async function() {
     if (banner) banner.classList.remove('hidden');
     
     const bboxDisplay = data.bounding_box ? `[${data.bounding_box.join(', ')}]` : `[${Math.round(norm_x1*100)}%, ${Math.round(norm_y1*100)}%, ${Math.round(norm_x2*100)}%, ${Math.round(norm_y2*100)}%]`;
-    if (bannerSrc) bannerSrc.innerText = `Source: ${item.filename || item.file_path.split('/').pop()} ${bboxDisplay}`;
+    if (bannerSrc) bannerSrc.innerText = `Source: ${item.filename || item.file_path.split(/[\/\\]/).pop()} ${bboxDisplay}`;
     
     // Set actual cropped image snippet as the thumbnail in the header!
     if (bannerImg) {
@@ -2395,7 +2563,7 @@ window.saveWorkspaceSession = async function() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             image_path: fPath,
-            label: t.label || fPath.split('/').pop(),
+            label: t.label || fPath.split(/[\/\\]/).pop(),
             group_name: t.group_name || 'default',
             crop_box: t.crop_box || null,
             recompute: false,
@@ -2506,7 +2674,7 @@ window.executeVideoCropSearch = async function() {
 
   const currentTs = player ? (player.currentTime || 0.0) : 0.0;
   const videoPath = match.file_path || match.video_path || '';
-  const fname = match.filename || (videoPath ? videoPath.split('/').pop() : 'video.mp4');
+  const fname = match.filename || (videoPath ? videoPath.split(/[\/\\]/).pop() : 'video.mp4');
 
   // Determine models to compute across
   const res = appState.lastSearchResults?.results || appState.lastSearchResults;
@@ -2678,7 +2846,7 @@ window.openVideoReviewModal = function(matchOrIdx) {
   if (!match) return;
 
   const modal = document.getElementById('videoReviewModal');
-  const filename = match.filename || match.file_path.split('/').pop();
+  const filename = match.filename || match.file_path.split(/[\/\\]/).pop();
   const maxScore = match.similarity_pct !== undefined ? match.similarity_pct : (match.score * 100).toFixed(1);
   const targetLabel = match.best_target_label || 'Target Reference';
   const keyframes = match.keyframes || (match.top_keyframe ? [match.top_keyframe] : []);
@@ -2723,7 +2891,7 @@ window.openVideoReviewModal = function(matchOrIdx) {
       pct: pct,
       timestamp: ts,
       thumbUrl: frameThumbUrl,
-      filename: kf.file_path ? kf.file_path.split('/').pop() : `frame_${ts.toFixed(2)}s.jpg`,
+      filename: kf.file_path ? kf.file_path.split(/[\/\\]/).pop() : `frame_${ts.toFixed(2)}s.jpg`,
     });
 
     if (pct > entry.maxScore) {
@@ -2738,7 +2906,7 @@ window.openVideoReviewModal = function(matchOrIdx) {
       kf.all_target_scores.forEach((t) => {
         const isTText = !!(t.is_text_query || (t.target_label && (t.target_label.startsWith('Prompt:') || t.target_label.startsWith('Text:'))) || isTextActive);
         const tQuery = t.query_text || textQueryStr;
-        const tLabel = t.target_label || (isTText ? `Prompt: "${tQuery}"` : (t.target_path ? t.target_path.split('/').pop() : 'Known Target'));
+        const tLabel = t.target_label || (isTText ? `Prompt: "${tQuery}"` : (t.target_path ? t.target_path.split(/[\/\\]/).pop() : 'Known Target'));
         const tPath = t.target_path || '';
         const tThumb = t.target_thumb || (tPath ? `/api/media/preview?path=${encodeURIComponent(tPath)}&thumb=1` : '');
         const tScore = t.score !== undefined ? Number(t.score) : 0.0;
@@ -2770,7 +2938,7 @@ window.openVideoReviewModal = function(matchOrIdx) {
     const allKnownTargets = appState.lastSearchResults?.known_targets || appState.knownImages || [];
     allKnownTargets.forEach((kt) => {
       const ktPath = kt.file_path || kt.path || '';
-      const ktLabel = kt.label || (ktPath ? ktPath.split('/').pop() : 'Known Target');
+      const ktLabel = kt.label || (ktPath ? ktPath.split(/[\/\\]/).pop() : 'Known Target');
       const key = ktPath || ktLabel;
       if (!targetsMap.has(key)) {
         targetsMap.set(key, {
@@ -2919,7 +3087,7 @@ window.openVideoReviewModal = function(matchOrIdx) {
       const isText = !!(target.isText || target.label.startsWith('Prompt:') || target.label.startsWith('Text:'));
       const isCrop = !isText && (target.label.toLowerCase().includes('crop') || (target.thumb && target.thumb.startsWith('data:image')));
       const queryDisplay = target.queryText || (target.label.startsWith('Prompt:') ? target.label.replace(/^Prompt:\s*"?/, '').replace(/"?$/, '') : target.label);
-      const targetFilename = target.path ? target.path.split('/').pop() : target.label;
+      const targetFilename = target.path ? target.path.split(/[\/\\]/).pop() : target.label;
       const targetThumbUrl = target.thumb || (target.path ? `/api/media/preview?path=${encodeURIComponent(target.path)}&thumb=1` : '');
 
       return `
@@ -3780,7 +3948,7 @@ let _currentInversionMediaId = null;
 
 window.triggerReverseEngineer = async function(encPath, mediaId) {
   const filePath = decodeURIComponent(encPath || '');
-  const fname = filePath.split('/').pop() || 'media.jpg';
+  const fname = filePath.split(/[\/\\]/).pop() || 'media.jpg';
 
   _currentInversionPath = filePath;
   _currentInversionMediaId = mediaId;
@@ -3967,7 +4135,7 @@ window.closeReverseEngineerModal = function() {
     let groupName = t.group_name;
     if (!groupName || groupName === 'default' || groupName === 'Reference') {
       if (t.file_path) {
-        const parts = t.file_path.split('/').filter(Boolean);
+        const parts = t.file_path.split(/[\/\\]/).filter(Boolean);
         if (parts.length >= 2) {
           const parentFolder = parts[parts.length - 2];
           groupName = (parentFolder && parentFolder !== 'known_files' && parentFolder !== 'test_images') ? parentFolder : 'General';
@@ -4003,7 +4171,7 @@ window.closeReverseEngineerModal = function() {
         </div>
         <div class="tree-folder-items">
           ${items.map(({ target, idx }) => {
-            const label = target.label || (target.file_path ? target.file_path.split('/').pop() : `Target ${idx+1}`);
+            const label = target.label || (target.file_path ? target.file_path.split(/[\/\\]/).pop() : `Target ${idx+1}`);
             const thumbUrl = target.file_path ? `/api/media/preview?path=${encodeURIComponent(target.file_path)}&thumb=1` : '';
             const key = target.file_path || target.label;
             const isChecked = appState.investigateSelectedTargets.has(key);
@@ -4028,6 +4196,7 @@ window.closeReverseEngineerModal = function() {
 };
 window.loadDatabaseByName = async function(dbFilename, knownInput = null) {
   if (!dbFilename) return;
+  closeLoadDbModal();
   showToast(`Loading database archive ${dbFilename}...`, 'info');
 
   try {

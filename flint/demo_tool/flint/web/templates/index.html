@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FLINT - Edge Vision Engine</title>
-  <link rel="stylesheet" href="/static/style.css?v=20260904_108" />
+  <link rel="stylesheet" href="/static/style.css?v=20260929_109" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -470,7 +470,68 @@
             </div>
           </div>
         </div>
-      </aside>
+
+        <!-- SECTION 5: EXIF FILTERS (COLLAPSED BY DEFAULT) -->
+        <div class="sidebar-accordion-card glass" id="cardExifFilters">
+          <div class="sidebar-accordion-header" onclick="toggleSidebarSection(this)">
+            <div class="accordion-header-title">
+              <span class="icon">📷</span>
+              <span>EXIF Filters</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span class="accordion-chevron-icon">▶</span>
+            </div>
+          </div>
+          <div class="sidebar-accordion-body hidden" style="padding: 10px;">
+            
+            <div class="filter-group">
+              <label class="filter-label" style="font-size: 11px; font-weight: 700; color: var(--accent-primary); margin-bottom: 4px; display: block;">Device Make/Model</label>
+              <div id="exifDeviceFiltersContainer" style="max-height: 120px; overflow-y: auto; background: var(--bg-surface-elevated); padding: 6px; border-radius: 4px; font-size: 11px;">
+                <div style="color: var(--text-muted);">Load evidence to see devices</div>
+              </div>
+            </div>
+
+            <div class="filter-group" style="margin-top: 10px;">
+              <label class="filter-label" style="font-size: 11px; font-weight: 700; color: var(--accent-primary); margin-bottom: 4px; display: block;">Creation Date</label>
+              <select id="exifDatePresetSelect" class="form-select form-select-sm" onchange="onExifPresetChange()" style="width: 100%; margin-bottom: 8px;">
+                <option value="none">Any Time</option>
+                <option value="custom">Custom Range...</option>
+                <option value="preset_month">By Month</option>
+                <option value="preset_season">By Season</option>
+                <option value="preset_year">By Year</option>
+              </select>
+              
+              <div id="exifCustomDateInputs" style="display: none;">
+                <input type="date" id="exifBaseDate" class="form-input form-input-sm" style="width: 100%; margin-bottom: 4px;" title="Reference Date">
+                <div style="display: flex; gap: 4px; align-items: center;">
+                  <input type="number" id="exifDateNum" class="form-input form-input-sm" value="1" min="1" style="width: 50px;">
+                  <select id="exifDateUnit" class="form-select form-select-sm" style="flex: 1;">
+                    <option value="days">Days</option>
+                    <option value="weeks">Weeks</option>
+                    <option value="years">Years</option>
+                  </select>
+                  <select id="exifDateDirection" class="form-select form-select-sm" style="flex: 1.5;">
+                    <option value="before_after">Before & After</option>
+                    <option value="before">Before</option>
+                    <option value="after">After</option>
+                  </select>
+                </div>
+              </div>
+
+              <div id="exifPresetInputs" style="display: none; margin-top: 4px;">
+                <select id="exifPresetValue" class="form-select form-select-sm" style="width: 100%; margin-bottom: 4px;"></select>
+                <input type="number" id="exifPresetYear" class="form-input form-input-sm" value="2024" style="width: 100%;" placeholder="Year (e.g. 2024)">
+              </div>
+            </div>
+
+            <div style="margin-top: 12px; display: flex; gap: 6px;">
+              <button class="btn btn-secondary-outline btn-sm" style="flex: 1;" onclick="applyInvestigateFilters()">Apply</button>
+              <button class="btn btn-secondary-outline btn-sm" style="flex: 1; color: #f87171; border-color: #f87171;" onclick="clearExifFilters()">Clear</button>
+            </div>
+
+          </div>
+        </div>
+        </aside>
 
       <!-- RIGHT MAIN STAGE: RESULTS & GALLERY -->
       <section class="investigate-main glass">
@@ -1203,7 +1264,7 @@
   </div>
 
   <!-- Main Application Script -->
-  <script src="/static/app.js?v=20260904_108"></script>
+  <script src="/static/app.js?v=20260929_109"></script>
 </body>
 </html>
 
