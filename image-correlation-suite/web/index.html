@@ -2233,7 +2233,6 @@
             let watchlistBadge = '';
             if (item.ref_identifier || item.ref_series_name) {
                 watchlistBadge = `<div class="watchlist-badge-pill">WATCHLIST: ${item.ref_series_name || 'MATCH'}</div>`;
-            }</div>`;
             }
 
             let scoreBadge = '';
@@ -3323,7 +3322,6 @@
                         let watchlistHtml = `<span class="tag-pill" style="background: rgba(16, 185, 129, 0.1); color: var(--accent-match); border: 1px solid rgba(16, 185, 129, 0.3); font-size: 10px; font-weight: 600;">CLEAN</span>`;
                         if (item.ref_identifier || item.ref_series_name) {
                             watchlistHtml = `<span class="tag-pill" style="background: rgba(239, 68, 68, 0.2); color: var(--accent-no-match); border: 1px solid var(--accent-no-match); font-weight: 700; font-size: 10px;">WATCHLIST: ${item.ref_series_name || 'MATCH'}</span>`;
-                        }</span>`;
                         }
 
                         let embsHtml = '';
